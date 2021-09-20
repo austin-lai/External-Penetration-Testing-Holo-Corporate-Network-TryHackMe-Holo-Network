@@ -8,6 +8,31 @@
 
 [Room = TryHackMe(THM) - Holo](https://tryhackme.com/room/hololive)
 
+The room is completed on September 5th, 2021
+
+It was fun and be sure you can learn a lots from this room !
+
+<!-- /Description -->
+
+<br />
+
+## Table of Contents
+
+<!-- TOC -->
+
+- [External Penetration Testing - Holo Corporate Network - TryHackMe - Holo Network](#external-penetration-testing---holo-corporate-network---tryhackme---holo-network)
+    - [Table of Contents](#table-of-contents)
+    - [Overview of Holo](#overview-of-holo)
+    - [Let's Begin Here !!!](#lets-begin-here-)
+        - [**HOLO External Penetration Test Report**](#holo-external-penetration-test-report)
+        - [Brief Addon WriteUp](#brief-addon-writeup)
+
+<!-- /TOC -->
+
+<br />
+
+## Overview of Holo
+
 Welcome to Holo!
 
 Holo is an Active Directory (AD) and Web Application attack lab that teaches core web attack vectors and advanced or obscure Active Directory attacks along with general red teaming methodology and concepts.
@@ -98,30 +123,13 @@ You will learn and exploit the following attacks and misconfigurations:
 
 <br />
 
-It was fun and tricky, and be sure you can learn a lots from this room !
+## Let's Begin Here !!!
 
-Now, let's get started !!!
-
-<!-- /Description -->
+### [**HOLO External Penetration Test Report**](https://github.com/austin-lai/External-Penetration-Testing-Holo-Corporate-Network-TryHackMe-Holo-Network/blob/master/BlackSunSecurity-ExternalPenetrationTestReport-HOLO-v1.0.pdf)
 
 <br />
 
-## Table of Contents
-
-<!-- TOC -->
-
-- [External Penetration Testing - Holo Corporate Network - TryHackMe - Holo Network](#external-penetration-testing---holo-corporate-network---tryhackme---holo-network)
-    - [Table of Contents](#table-of-contents)
-    - [Task 1](#task-1)
-
-<!-- /TOC -->
-
-<br />
-
-## Task 1
-
-
-
+### Brief Addon WriteUp
 
 
 
