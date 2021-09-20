@@ -8,7 +8,7 @@
 
 [Room = TryHackMe(THM) - Holo](https://tryhackme.com/room/hololive)
 
-The room is completed on September 5th, 2021
+The room is completed on September 7th, 2021
 
 It was fun and be sure you can learn a lots from this room !
 
@@ -126,8 +126,6 @@ You will learn and exploit the following attacks and misconfigurations:
 ## Let's Begin Here !!!
 
 ### [**HOLO External Penetration Test Report**](https://github.com/austin-lai/External-Penetration-Testing-Holo-Corporate-Network-TryHackMe-Holo-Network/blob/master/BlackSunSecurity-ExternalPenetrationTestReport-HOLO-v1.0.pdf)
-
-<br />
 
 ### Brief Addon WriteUp
 
