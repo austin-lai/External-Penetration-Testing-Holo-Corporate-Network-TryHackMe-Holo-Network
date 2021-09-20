@@ -12,6 +12,10 @@ The room is completed on September 7th, 2021
 
 It was fun and be sure you can learn a lots from this room !
 
+My first ever Pentest Report or OSCP like report, truly appreciate and welcome anyone would willing to provide feedback, I wish to have better report writing skill.
+
+Thank you so much in advance.
+
 <!-- /Description -->
 
 <br />
@@ -25,7 +29,7 @@ It was fun and be sure you can learn a lots from this room !
     - [Overview of Holo](#overview-of-holo)
     - [Let's Begin Here !!!](#lets-begin-here-)
         - [**HOLO External Penetration Test Report**](#holo-external-penetration-test-report)
-        - [Brief Add-on WriteUp](#brief-add-on-writeup)
+        - [Brief WriteUp Add-on for Report](#brief-writeup-add-on-for-report)
 
 <!-- /TOC -->
 
@@ -40,6 +44,8 @@ Holo is an Active Directory (AD) and Web Application attack lab that teaches cor
 This network simulates an external penetration test on a corporate network "Hololive" with one intended kill chain. All concepts and exploits will be taught in a red teaming methodology and mindset with other methods and techniques taught throughout the network.
 
 This network brings you from zero to red-team, but you are expected to have a general understanding of basic Windows and Linux architecture and the command line for both Windows and Linux.
+
+Before we get too overzealous in attacking web servers and hacking the world, we need to identify our scope and perform some initial recon to identify assets. Your trusted agent has informed you that the scope of the engagement is 10.200.x.0/24 and 192.168.100.0/24.
 
 <br />
 
@@ -127,7 +133,32 @@ You will learn and exploit the following attacks and misconfigurations:
 
 ### [**HOLO External Penetration Test Report**](https://github.com/austin-lai/External-Penetration-Testing-Holo-Corporate-Network-TryHackMe-Holo-Network/blob/master/BlackSunSecurity-ExternalPenetrationTestReport-HOLO-v1.0.pdf)
 
-### Brief Add-on WriteUp
+The report has included below section in general for your references:
+
+1. Cover page
+2. Business Confidential
+3. Table of Content
+4. Holo External Penetration Test Report
+    - Introduction | Purpose
+    - External Penetration Test Scope
+    - Executive Summary
+    - Attack Timeline and Summary
+    - Severity Classification
+    - Summary of Vulnerability
+    - Security Weakness and Recommendation
+    - External Penetration Test Methodologies (include detail of Information Gathering, Penetration, Maintain Access, House Cleaning)
+5. Conclusion | Summary
+6. Additional Items
+    - Appendix 1 - References
+    - Appendix 2 - MITRE ATT&CK Framework
+    - Appendix 3 - Trophies
+    - Appendix 4 - Meterpreter Usage
+    - Appendix 5 - Account Usage
+    - Appendix 6 - Additional [tools | binary] Usage
+
+<br />
+
+### Brief WriteUp Add-on for Report
 
 Information gathering - basic network scan for host alive:
 
