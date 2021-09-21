@@ -162,6 +162,8 @@ The report has included below section in general for your references:
 
 Information gathering - basic network scan for host alive:
 
+<details><summary>nmap result</summary>
+
 ```bash
 nmap -nvv -sn -oN ./holo-kali-08092021/10.200.107.0-network-scan 10.200.107.0/24 && ./holo-kali-08092021/10.200.107.0-network-scan | grep --color=always -B 1 up
 
@@ -209,7 +211,11 @@ Nmap scan report for 10.200.107.33
 Host is up, received syn-ack (0.33s latency).
 ```
 
+</details>
+
 Information gathering - detail rustscan for target 10.200.107.33:
+
+<details><summary>rustscan result</summary>
 
 ```bash
 sudo rustscan -u 5000 -b 1900 -t 4000 --tries 2 --scan-order serial -a 10.200.107.33 -- -A -sVC --script=safe,default,discovery,version,vuln | sudo tee rustscan-full-result-10.200.107.33
@@ -836,6 +842,8 @@ OS and Service detection performed. Please report any incorrect results at https
 Nmap done: 1 IP address (1 host up) scanned in 253.77 seconds
            Raw packets sent: 107 (10.784KB) | Rcvd: 2590 (2.966MB)
 ```
+
+</details>
 
 
 
