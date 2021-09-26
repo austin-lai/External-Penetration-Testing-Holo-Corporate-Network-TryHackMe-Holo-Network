@@ -1132,25 +1132,25 @@ We then perform enumeration and information gathering from mysql server:
 
 - First, we check on the version of mysql server --- ` SHOW VARIABLES LIKE “%version%”; `
 
-![show-variable-version](show-variable-version.png)
+    ![show-variable-version](show-variable-version.png)
 
 - Then we get the information of databases available --- ` show databases; `
 
-![show-databases](show-databases.png)
+    ![show-databases](show-databases.png)
 
 - There is one database is not the default database created by mysql --- ` DashboardDB `, we have selected this database to enumerate further
 
-![use-dashboarddb](use-dashboarddb.png)
+    ![use-dashboarddb](use-dashboarddb.png)
 
 - We use ` show tables; ` to understand what are the tables available on this ` DashboardDB ` database and we found a user table, we have dump the enitre user table out.
 
-![show-tables](show-tables.png)
+    ![show-tables](show-tables.png)
 
 - We also dumping the user table from mysql database, as we know this is the table store the credentials of mysql by ` SELECT User FROM mysql.user; ` and ` ELECT host,User,authentication_string FROM mysql.user; `
 
-![user-mysql-1](user-mysql-1.png)
+    ![user-mysql-1](user-mysql-1.png)
 
-![user-mysql-2](user-mysql-2.png)
+    ![user-mysql-2](user-mysql-2.png)
 
 As we have the access to mysql server on ` 192.168.100.1 `, we can exploit the mysql server to escape current docker container and gain access to the host system.
 
