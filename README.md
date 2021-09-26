@@ -1,7 +1,7 @@
 # External Penetration Testing - Holo Corporate Network - TryHackMe - Holo Network
 
 > Austin Lai | September 20th, 2021
-> Updated    | September 21st, 2021
+> Updated    | September 26th, 2021
 
 ---
 
@@ -1065,35 +1065,63 @@ We found db_connect.php:
 
 ![db_connect.php-admin.holo.live](db_connect.php-admin.holo.live.png)
 
-User.txt:
+We enumerated through /var/www and found user.txt:
 
 ![user.txt-1-admin.holo.live](user.txt-1-admin.holo.live.png)
 
 ![user.txt-2-admin.holo.live](user.txt-2-admin.holo.live.png)
 
+Next we enumerated through ` / ` directory and located .dockerenv, this file exist and let us know current system is a docker container.
 
+```bash
+find / -type f -name "*.dockerenv" -ls 2>/dev/null
+```
 
+![dockerenv-admin.holo.live](dockerenv-admin.holo.live.png)
 
+Since this is a docker container, we know that docker created docker network as internal network to connect diffirent container, we decided to check out the network information from current docker container by using ` ifconfig `.
 
+![ifconfig-admin.holo.live](ifconfig-admin.holo.live.png)
 
+From the netwoork information shown, we currently on 192.168.100.0/24 network which is inaccessible from Holo corporate network (10.200.107.0/24)
 
+We then check on  the routing information by using ` route -nv `
 
+![route-admin.holo.live](route-admin.holo.live.png)
 
+From the routing, we know the gateway is 192.168.100.1
 
+Let's perform a quick port scanning on 192.168.100.1 leveraging the netcat binary available on current docker container.
 
+```bash
+for port in {1..20000}; do timeout 2 nc -znv 192.168.100.1 $port 2>&1 | grep open ; done
+```
 
+![port-scan-192.168.100.1](port-scan-192.168.100.1.png)
 
+From the port scanning result, we know that there is mysql service running on 192.168.100.1, we may use the credential found previously (db_connect.php) to login into mysql server which reside on 192.168.100.1
 
+We can confirmed this by checking if mysql client connection is running on current docker container by using ` ps -elf | grep mysql `
 
+![mysql-client-192.168.100.100](mysql-client-192.168.100.100.png)
 
+Let's login to mysql server on 192.168.100.1 by ` mysql -u admin -p -h 192.168.100.1 `
 
+![login-mysql-192.168.100.1](login-mysql-192.168.100.1.png)
 
+We then perform enumeration and information gathering from mysql server:
 
+- First, we check on the version of mysql server - ` SHOW VARIABLES LIKE “%version%”; `
+![show-variable-version](show-variable-version.png)
 
+- Then we get the information of databases available - ` show databases; `
+![show-databases](show-databases.png)
 
+- There is one database is not the defualt database created by mysql - ` DashbordDB `, we have selected this database to enumerate further
+![use-dashboarddb](use-dashboarddb.png)
 
-
-
+- We use ` show tables; ` to understand what are the tables available on this ` DashboardDb ` database and we found a user table, we have dump the enitre user table out.
+![show-tables](show-tables.png)
 
 
 
