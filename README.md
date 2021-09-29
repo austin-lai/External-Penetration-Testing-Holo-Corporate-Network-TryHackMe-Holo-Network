@@ -1,7 +1,7 @@
 # External Penetration Testing - Holo Corporate Network - TryHackMe - Holo Network
 
 > Austin Lai | September 20th, 2021
-> Updated    | September 28th, 2021
+> Updated    | September 29th, 2021
 
 ---
 
@@ -1423,6 +1423,8 @@ Source of main page for ` 10.200.107.31 `
 
 As ` 10.200.107.31 ` showing login page, we decide try to log into it using the credentials found previously (that we dump from the database called "DashboardDB" that is in mysql server on 192.168.100.1).
 
+Do keep in mind, there is "Forgot Password" page that we have not explore for now.
+
 Login using admin user, however it only show blank page:
 
 ![admin-login](admin-login.png)
@@ -1431,18 +1433,43 @@ Login using gurag user, below is the response page:
 
 ![gurag-login](gurag-login.png)
 
-From the trial login, we know that ` gurag ` is a valid user.
+From the response of login page, we know that ` gurag ` is a valid user.
 
+Let's jump back to "Forgot Password" page.
 
+![forgot-password-page](forgot-password-page.png)
 
+Source of forgot password page:
 
+![source-of-forgot-password-page](source-of-forgot-password-page.png)
 
+Request header of forgot password page:
 
+![request-header-of-forgot-password-page](request-header-of-forgot-password-page.png)
 
+Now we try to reset "gurag" password as it is a valid user to allow us login.
 
+![request-header-reset-gurag](request-header-reset-gurag.png)
 
+From the request header, we can see that the password reset (initially from reset_form.php) was sent to "password_reset.php" and require a "username" and "user_token".
 
+Here is the response cookies from the reset password:
 
+![response-cookie-gurag](response-cookie-gurag.png)
+
+From the response cookies, we are able to retrieve the "user_token" which is a weak password reset mechanism fall under OWASP - Broken Authentication.
+
+With the "user_token" visible, we now able to craft a valid password reset link for our taregted user "gurag"
+
+The payload we used as below:
+
+```bash
+curl http://10.200.107.31/password_reset.php?user=gurag&user_token=input_user_token_here
+```
+
+Password reset for "gurag":
+
+![password-reset-gurag](password-reset-gurag.png)
 
 
 
