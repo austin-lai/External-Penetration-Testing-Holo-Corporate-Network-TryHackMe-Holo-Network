@@ -1017,7 +1017,7 @@ Disallow: /var/www/admin/dashboard.php
 Disallow: /var/www/admin/supersecretdir/creds.txt
 ```
 
-From here, we know probably we can retireve the file by exploiting Local File Inclusion vulnerability in PHP.
+From here, we know probably we can retrieve the file by exploiting Local File Inclusion vulnerability in PHP.
 
 However, we are unable to retrieve the file from admin.holo.live as it is a login page.
 
