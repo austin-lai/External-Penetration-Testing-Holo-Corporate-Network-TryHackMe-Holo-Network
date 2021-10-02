@@ -911,7 +911,7 @@ Seem like we found additional sub-domain available, let's add to our host file
 sudo sed -i.bak 's/$/ admin.holo.live dev.holo.live/' /etc/hosts && cat /etc/hosts && ls -l /etc/hosts*
 ```
 
-Now we scan enumerate all the sub-domain, you may use basic gobuster dir scan, however since we know we can read robots text, in our case we speific gobuster to search with file extension.
+Now we can scan and enumerate all the sub-domain, you may use basic gobuster dir scan, however since we know we can read robots text, in our case we specific gobuster to search with file extension.
 
 <details><summary>result of gobuster dir with file extension for www.holo.live</summary>
 
