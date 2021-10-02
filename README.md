@@ -1045,7 +1045,7 @@ Let's try out --- the payload we used is ` http://dev.holo.live/img.php?file=../
 
 Now, let's modified our payload to ` http://dev.holo.live/img.php?file=../../../var/www/admin/supersecretdir/creds.txt `
 
-This will allow us try to retreive the ` creds.txt ` stated in ` robots.txt ` of admin.holo.live as we know development environment usually is a replication of production environment.
+This will allow us try to retrieve the ` creds.txt ` stated in ` robots.txt ` of admin.holo.live as we know development environment usually is a replication of production environment.
 
 ![creds-img.php-dev.holo.live](img/creds-img.php-dev.holo.live.png)
 
