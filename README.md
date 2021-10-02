@@ -2,7 +2,7 @@
 
 > Austin Lai | September 20th, 2021
 
-> Updated    | September 29th, 2021
+> Updated    | October 2nd, 2021
 
 ---
 
@@ -1053,7 +1053,7 @@ Now we get a credentials, let's try to login to admin.holo.live:
 
 ![login-success-admin.holo.live](img/login-success-admin.holo.live.png)
 
-Once we login, we check on the source of dashboard.php, right away we notice there is PHP Rmote Code Execution ([OWASP Command Injection](https://owasp.org/www-project-top-ten/2017/A1_2017-Injection)) under the comment for "visitor visted today"
+Once we login, we check on the source of dashboard.php, right away we notice there is PHP Remote Code Execution ([OWASP Command Injection](https://owasp.org/www-project-top-ten/2017/A1_2017-Injection)) under the comment for "visitor visited today"
 
 ```php
 <!-- //if ($_GET['cmd'] === NULL) { echo passthru("cat /tmp/Views.txt"); } else { echo passthru($_GET['cmd']);} -->
