@@ -136,7 +136,7 @@ You will learn and exploit the following attacks and misconfigurations:
 
 ### [**HOLO External Penetration Test Report**](https://github.com/austin-lai/External-Penetration-Testing-Holo-Corporate-Network-TryHackMe-Holo-Network/blob/master/BlackSunSecurity-ExternalPenetrationTestReport-HOLO-v1.0.pdf)
 
-### [**HOLO External Penetration Test Report v1.2 - Updated 03102021**](https://github.com/austin-lai/External-Penetration-Testing-Holo-Corporate-Network-TryHackMe-Holo-Network/blob/master/BlackSunSecurity-ExternalPenetrationTestReport-HOLO-v1.0.pdf)
+### [**HOLO External Penetration Test Report v1.2 - Updated 03102021**](https://github.com/austin-lai/External-Penetration-Testing-Holo-Corporate-Network-TryHackMe-Holo-Network/blob/master/BlackSunSecurity-ExternalPenetrationTestReport-HOLO-v1.2.pdf)
 
 The report has included below section in general for your references:
 
