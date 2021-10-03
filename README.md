@@ -30,7 +30,7 @@ Thank you so much in advance.
     - [Table of Contents](#table-of-contents)
     - [Overview of Holo](#overview-of-holo)
     - [Let's Begin Here !!!](#lets-begin-here-)
-        - [**HOLO External Penetration Test Report**](#holo-external-penetration-test-report)
+        - [HOLO External Penetration Test Report](#holo-external-penetration-test-report)
         - [**HOLO External Penetration Test Report v1.2 - Updated 03102021**](#holo-external-penetration-test-report-v12---updated-03102021)
         - [Brief WriteUp Add-on for Report](#brief-writeup-add-on-for-report)
 
@@ -134,7 +134,7 @@ You will learn and exploit the following attacks and misconfigurations:
 
 ## Let's Begin Here !!!
 
-### [**HOLO External Penetration Test Report**](https://github.com/austin-lai/External-Penetration-Testing-Holo-Corporate-Network-TryHackMe-Holo-Network/blob/master/BlackSunSecurity-ExternalPenetrationTestReport-HOLO-v1.0.pdf)
+### [HOLO External Penetration Test Report](https://github.com/austin-lai/External-Penetration-Testing-Holo-Corporate-Network-TryHackMe-Holo-Network/blob/master/BlackSunSecurity-ExternalPenetrationTestReport-HOLO-v1.0.pdf)
 
 The report has included below section in general for your references:
 
