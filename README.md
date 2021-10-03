@@ -2,7 +2,7 @@
 
 > Austin Lai | September 20th, 2021
 
-> Updated    | October 2nd, 2021
+> Updated    | October 3rd, 2021
 
 ---
 
