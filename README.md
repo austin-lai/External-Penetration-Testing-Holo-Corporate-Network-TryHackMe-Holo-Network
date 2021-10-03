@@ -31,7 +31,7 @@ Thank you so much in advance.
     - [Overview of Holo](#overview-of-holo)
     - [Let's Begin Here !!!](#lets-begin-here-)
         - [**HOLO External Penetration Test Report**](#holo-external-penetration-test-report)
-        - [**HOLO External Penetration Test Report v1.2 - Updated 03102021**](#holo-external-penetration-test-report-v1.2---updated-03102021)
+        - [**HOLO External Penetration Test Report v1.2 - Updated 03102021**](#holo-external-penetration-test-report-v12---updated-03102021)
         - [Brief WriteUp Add-on for Report](#brief-writeup-add-on-for-report)
 
 <!-- /TOC -->
